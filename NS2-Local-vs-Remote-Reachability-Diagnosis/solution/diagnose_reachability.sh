@@ -1,21 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-host="${1:-127.0.0.1}"
-port="${2:-8080}"
-scheme="${3:-http}"
+#################
+#   CONSTANTS   #
+#################
+readonly DEFAULT_HOST="127.0.0.1"
+readonly DEFAULT_PORT="8080"
+readonly DEFAULT_SCHEME="http"
+readonly CURL_TIMEOUT_SECONDS="3"
+readonly -a REQUIRED_COMMANDS=(ss ip curl nc)
 
-probe_url="${scheme}://${host}:${port}"
-
+#################
+#   FUNCTIONS   #
+#################
+# Require one command before the diagnosis tries to use it
 check_command() {
+	# Stop early when a required diagnostic command is missing
 	if ! command -v "$1" >/dev/null 2>&1; then
 		echo "missing required command: $1" >&2
 		exit 1
 	fi
 }
 
-for required in ss ip curl nc; do
-	check_command "$required"
+#################
+#   MAIN CODE   #
+#################
+# Read optional target settings from the command line
+host="${1:-$DEFAULT_HOST}"
+port="${2:-$DEFAULT_PORT}"
+scheme="${3:-$DEFAULT_SCHEME}"
+probe_url="${scheme}://${host}:${port}"
+
+# Verify every command needed for the diagnosis
+for required_command in "${REQUIRED_COMMANDS[@]}"; do
+	check_command "$required_command"
 done
 
 echo "== listener state =="
@@ -31,11 +49,11 @@ ip route show
 echo
 
 echo "== localhost probe =="
-curl --max-time 3 -I "http://127.0.0.1:$port" || true
+curl --max-time "$CURL_TIMEOUT_SECONDS" -I "http://127.0.0.1:$port" || true
 echo
 
 echo "== remote-style probe to $probe_url =="
-curl --max-time 3 -I "$probe_url" || true
+curl --max-time "$CURL_TIMEOUT_SECONDS" -I "$probe_url" || true
 echo
 
 echo "== raw TCP probe =="

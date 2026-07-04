@@ -1,15 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+#################
+#   CONSTANTS   #
+#################
+readonly ROOT_USER_ID="0"
+readonly SSH_SERVICE_NAME="OpenSSH"
+readonly HTTP_PORT_RULE="80/tcp"
+readonly HTTPS_PORT_RULE="443/tcp"
+
+#################
+#   MAIN CODE   #
+#################
+# Require root because firewall changes affect host connectivity
+if [[ "${EUID:-$(id -u)}" -ne "$ROOT_USER_ID" ]]; then
 	echo "Run this script as root so UFW changes can be applied." >&2
 	exit 1
 fi
 
 echo "Applying safe web-server rollout policy"
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
+ufw allow "$SSH_SERVICE_NAME"
+ufw allow "$HTTP_PORT_RULE"
+ufw allow "$HTTPS_PORT_RULE"
 ufw logging on
 ufw --force enable
 echo
