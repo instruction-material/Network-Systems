@@ -1,40 +1,48 @@
-#################
-#   CONSTANTS   #
-#################
+"""Run the owned experiment, then interpret its recorded evidence."""
+import argparse
+import json
+import signal
+import sys
 
-MIN_PORT = 1
-MAX_PORT = 65535
-SAMPLE_PORT_VALUES = ["22", "443", "8080", "bad"]
-
-
-#################
-#   FUNCTIONS   #
-#################
+from network_lab import transport
 
 
-def normalize_ports(raw_values: list[str]) -> list[int]:
-    """Convert valid numeric port strings into port numbers"""
-    normalized_ports: list[int] = []
-
-    # Check each raw value before converting it into an integer
-    for raw_value in raw_values:
-        # Skip values that are not decimal port numbers
-        if not raw_value.isdigit():
-            continue
-
-        port = int(raw_value)
-
-        # Keep only ports inside the valid TCP and UDP range
-        if MIN_PORT <= port <= MAX_PORT:
-            normalized_ports.append(port)
-
-    return normalized_ports
+def analyze(evidence):
+    worker = evidence["workerResult"]
+    stream = b"".join(bytes.fromhex(chunk) for chunk in worker["tcpReadsHex"])
+    return {
+        "tcpBytes": len(stream),
+        "tcpReadCalls": len(worker["tcpReadsHex"]),
+        "tcpCompleteLine": stream.endswith(b"\n"),
+        "tcpEofObserved": worker["tcpEofObserved"],
+        "udpDatagramLengths": [len(bytes.fromhex(row["dataHex"]))
+                               for row in worker["datagrams"]],
+        "udpTruncated": [row["truncated"] for row in worker["datagrams"]],
+        "emptyUdpIsDatagram": worker["datagrams"][0]["dataHex"] == "",
+        "scope": "same Linux network namespace",
+    }
 
 
-def main() -> None:
-    """Print the normalized sample ports"""
-    print(normalize_ports(SAMPLE_PORT_VALUES))
+def interrupted(signum, _frame):
+    raise SystemExit(128 + signum)
+
+
+def main():
+    signal.signal(signal.SIGTERM, interrupted)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--message", default="First transport observation")
+    parser.add_argument("--udp-buffer", type=int, default=256)
+    parser.add_argument("--without-newline", action="store_true")
+    args = parser.parse_args()
+    try:
+        evidence = transport(args.message, args.udp_buffer, not args.without_newline)
+        evidence["analysis"] = analyze(evidence)
+        print(json.dumps(evidence, ensure_ascii=True, indent=2))
+    except (OSError, ValueError, TimeoutError) as error:
+        print(str(error), file=sys.stderr)
+        return 2
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

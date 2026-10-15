@@ -69,7 +69,15 @@ Canonical source repository: `Network-Systems`
 
 ## Source Inventory
 
-- Top-level folders: 50
+- Top-level course folders: 50
 - Active linked folders: 50
-- Ledgered inactive/support folders: 0
-- Source-like files: 139
+- Ledgered inactive/support folders: 2
+- Source-like files: 154
+
+## Scoped Native Acceptance
+
+The two introductory foundations have an ordinary-user Linux workflow in
+`.github/workflows/native-network.yml`. Its raw evidence covers those two
+projects only. The other 42 generic Python pairs and six preserved shell
+projects are not certified by that workflow. `test/` and `.github/workflows/`
+are validation support, not additional learner assignments.

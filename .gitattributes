@@ -1,0 +1,6 @@
+/.gitattributes text eol=lf
+/verify-course-source.sh text eol=lf
+/.github/workflows/*.yml text eol=lf
+/test/*.py text eol=lf
+/NS-04-ns0-setup-and-tooling/** text eol=lf
+/NS-05-unit-1-the-network-stack-in-plain-english/** text eol=lf
