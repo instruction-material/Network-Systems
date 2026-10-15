@@ -1,40 +1,46 @@
-#################
-#   CONSTANTS   #
-#################
+"""Observe the lab without coding; analyze the evidence as an optional extension."""
+import argparse
+import json
+import signal
+import sys
 
-MIN_PORT = 1
-MAX_PORT = 65535
-SAMPLE_PORT_VALUES = ["22", "443", "8080", "bad"]
-
-
-#################
-#   FUNCTIONS   #
-#################
+import naming_lab
 
 
-def normalize_ports(raw_values: list[str]) -> list[int]:
-    """Convert valid numeric port strings into port numbers"""
-    normalized_ports: list[int] = []
-
-    # Check each raw value before converting it into an integer
-    for raw_value in raw_values:
-        # Skip values that are not decimal port numbers
-        if not raw_value.isdigit():
-            continue
-
-        port = int(raw_value)
-
-        # Keep only ports inside the valid TCP and UDP range
-        if MIN_PORT <= port <= MAX_PORT:
-            normalized_ports.append(port)
-
-    return normalized_ports
+def analyze(evidence):
+    return {
+        "query": evidence["resolverQuery"],
+        "resolvedFamilies": sorted({
+            row["family"] for row in evidence["resolverAnswers"]
+        }),
+        "selectedEndpoint": evidence["ready"]["http"],
+        "ipv6Probe": evidence["ipv6Probe"],
+        "workerClosedItsSockets": evidence["workerResult"]["socketsClosed"],
+        "dnsOnlyObservation": False,
+    }
 
 
-def main() -> None:
-    """Print the normalized sample ports"""
-    print(normalize_ports(SAMPLE_PORT_VALUES))
+def interrupted(signum, _frame):
+    raise SystemExit(128 + signum)
+
+
+def main():
+    signal.signal(signal.SIGTERM, interrupted)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--message", default="Owned addressing observation")
+    parser.add_argument("--lookup", choices=("localhost", "127.0.0.1"), default="localhost")
+    parser.add_argument("--network", default='2001:db8::/126')
+    parser.add_argument("--candidates", default='2001:db8::,2001:db8::1,2001:db8::3,2001:db8::4,127.0.0.1')
+    args = parser.parse_args()
+    try:
+        evidence = naming_lab.addressing(args.message, args.network, args.candidates, args.lookup)
+        evidence["analysis"] = analyze(evidence)
+        print(json.dumps(evidence, ensure_ascii=True, indent=2))
+    except (OSError, ValueError, TimeoutError) as error:
+        print(str(error), file=sys.stderr)
+        return 2
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

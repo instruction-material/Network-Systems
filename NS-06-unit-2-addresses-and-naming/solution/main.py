@@ -1,40 +1,51 @@
-#################
-#   CONSTANTS   #
-#################
+"""Observe the lab without coding; analyze the evidence as an optional extension."""
+import argparse
+import json
+import signal
+import sys
 
-MIN_PORT = 1
-MAX_PORT = 65535
-SAMPLE_PORT_VALUES = ["22", "443", "8080", "bad"]
-
-
-#################
-#   FUNCTIONS   #
-#################
+import naming_lab
 
 
-def normalize_ports(raw_values: list[str]) -> list[int]:
-    """Convert valid numeric port strings into port numbers"""
-    normalized_ports: list[int] = []
+def analyze(evidence):
+    endpoint = evidence["ready"]["http"]
+    return {
+        "resolvedIpv4": sorted({
+            row["address"] for row in evidence["resolverAnswers"]
+            if row["family"] == 2
+        }),
+        "endpoint": {"address": endpoint["address"], "port": endpoint["port"],
+                     "transport": "TCP"},
+        "httpMatches": evidence["httpResponse"] == {
+            "message": evidence["message"], "path": "/lab",
+        },
+        "network": naming_lab.network_rows(
+            evidence["networkInput"], evidence["candidateInput"],
+        ),
+    }
 
-    # Check each raw value before converting it into an integer
-    for raw_value in raw_values:
-        # Skip values that are not decimal port numbers
-        if not raw_value.isdigit():
-            continue
 
-        port = int(raw_value)
-
-        # Keep only ports inside the valid TCP and UDP range
-        if MIN_PORT <= port <= MAX_PORT:
-            normalized_ports.append(port)
-
-    return normalized_ports
+def interrupted(signum, _frame):
+    raise SystemExit(128 + signum)
 
 
-def main() -> None:
-    """Print the normalized sample ports"""
-    print(normalize_ports(SAMPLE_PORT_VALUES))
+def main():
+    signal.signal(signal.SIGTERM, interrupted)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--message", default="Owned addressing observation")
+    parser.add_argument("--lookup", choices=("localhost", "127.0.0.1"), default="localhost")
+    parser.add_argument("--network", default='192.0.2.64/26')
+    parser.add_argument("--candidates", default='192.0.2.63,192.0.2.64,192.0.2.65,192.0.2.126,192.0.2.127,192.0.2.128')
+    args = parser.parse_args()
+    try:
+        evidence = naming_lab.addressing(args.message, args.network, args.candidates, args.lookup)
+        evidence["analysis"] = analyze(evidence)
+        print(json.dumps(evidence, ensure_ascii=True, indent=2))
+    except (OSError, ValueError, TimeoutError) as error:
+        print(str(error), file=sys.stderr)
+        return 2
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

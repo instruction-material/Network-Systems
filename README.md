@@ -34,7 +34,7 @@ starter, completed starter and reference roles. Its 48 cases include 33 real own
 network experiments and fifteen invalid-input refusals. A passing presence check is
 not a substitute for those native observations.
 
-The other 42 generic Python starter/reference pairs remain under content audit;
+The other 39 generic Python starter/reference pairs remain under content audit;
 this change does not certify them. The six earlier shell projects below are
 preserved and have separate goals and tooling requirements:
 
@@ -49,3 +49,9 @@ Use the individual guide before any route, firewall or packet-capture operation.
 The two introductory packs use only their own loopback sockets and do not
 reconfigure the lab. They require a Linux VM, WSL or another owned Linux lab;
 the browser workspace is an editor and export path for this native work.
+
+## Addresses and Naming
+
+The required Unit 2 pack observes an actual local endpoint and operating-system name lookup. Its two supplemental packs transfer prefix boundary reasoning to /31 and /32 and compare address families. Each has a complete guide, working instrumentation, an evidence notebook and an optional analysis function.
+
+Run python3 test/verify_naming.py --proof output/network-addressing.json as an ordinary Linux user for native acceptance. Source-only checking uses --source-only and never marks native acceptance. The native gate records 45 real owned HTTP experiments and 45 pre-experiment input refusals.
