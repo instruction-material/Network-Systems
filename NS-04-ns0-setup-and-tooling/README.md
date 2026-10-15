@@ -3,7 +3,8 @@
 The required project establishes where commands run, which tools are available,
 and what a local service observation actually proves. Prerequisite: comfortable
 Linux navigation, command execution and reading output. The deliverable is a
-working analysis function plus an evidence notebook from the chosen Linux lab.
+verified Linux environment and an evidence notebook from that lab. The working
+Python instrumentation is supplied; programming it is supplemental practice.
 This replaces the unrelated port-list exercise previously present in this folder.
 
 ## Working environment
@@ -39,13 +40,14 @@ interface. Here `127.0.0.1` names the current namespace, not a different host.
 Start in `starter/` and run `python3 main.py`. The working instrumentation in
 `network_lab.py` performs the experiment even while the analysis is unfinished.
 The JSON includes raw command output, actual endpoint and process identities,
-transport observations, and `analysis: null`. Complete only the marked
-`analyze(evidence)` function in `main.py`; keep the instrumentation unchanged.
-Write the explanation and command evidence in `network-notes.md`.
+transport observations, and `analysis: null`. For the required lab, leave the code unchanged and record the explanation and
+command evidence in `network-notes.md`. An optional Python extension completes
+the marked `analyze(evidence)` function in `main.py`; keep the instrumentation
+unchanged if choosing that extension. Python programming is not a prerequisite.
 
-The Python dictionary contract below makes the programming task explicit. The
-notebook is a separate explanation task. A returned dictionary does not grade
-that explanation. Keep the first run before editing, predict a changed case,
+The required project develops networking interpretation through the observed
+commands and notebook. The Python dictionary contract below is supplemental code
+practice. A returned dictionary does not grade the required explanation. Keep the first run before editing, predict a changed case,
 then run it and compare the observation with the prediction. The `solution/`
 folder provides one reference after an independent attempt or an agreed
 instructor checkpoint. It does not replace the commands and observations.
@@ -65,8 +67,9 @@ have finite deadlines, and the parent cleans up its owned worker on failure.
 
 ## Independent and instructor use
 
-Work through environment checks, prediction, untouched starter, implementation,
-changed case, and explanation in that order. In a paced session pause after the
+Work through environment checks, prediction, untouched starter, changed cases,
+and explanation in that order. If choosing the Python extension, implement its
+analysis function afterward and repeat the changed cases. In a paced session pause after the
 prediction and after the first raw evidence, before consulting the reference.
 The operations notebook continues this same core project and should retain its
 observations; it is not a second independent programming assignment. Additional
@@ -99,9 +102,10 @@ proves that a file was found on PATH. It does not prove remote login permission,
 DNS correctness, or a complete route to another host. Verify remote access using
 only the owned Linux host selected during setup and its normal connection method.
 
-## Analysis contract
+## Optional Python analysis extension
 
-Return a dictionary with these exact fields:
+The required lab uses the observations and notebook. For supplemental code
+practice, return a dictionary with these exact fields:
 
 - `linux`: whether the recorded platform equals `linux`.
 - `availableTools`: the sorted keys of the recorded tool inventory.
@@ -129,9 +133,10 @@ if a hostname is used, a path to that address, a reachable listening endpoint,
 and the relevant host and network policy. Those later diagnostics belong to the
 following units, rather than being inferred from loopback success.
 
-Completion: the analysis agrees with the real records in two runs, all required
-tools are located in the intended Linux environment, the notebook names the
-observed evidence and its limit, and no worker is left running.
+Core completion: all required tools are located in the intended Linux
+environment, the notebook explains the actual route, listener and HTTP evidence
+from two runs, and no worker is left running. If choosing the Python extension,
+its analysis must also agree with those same recorded observations.
 
 References: [ip-address](https://man7.org/linux/man-pages/man8/ip-address.8.html),
 [ip-route](https://man7.org/linux/man-pages/man8/ip-route.8.html),

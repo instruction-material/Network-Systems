@@ -2,8 +2,9 @@
 
 The required project connects applications, sockets, ports and transport behavior
 to real Linux observations. Prerequisite: the NS0 environment and local request
-project. The deliverable is an analysis function and a layer-by-layer evidence
-notebook. This replaces the unrelated port-list exercise previously in this folder.
+project. The deliverable is a layer-by-layer evidence notebook
+from actual command and socket observations. The supplied instrumentation runs
+unchanged; Python analysis code is supplemental practice. This replaces the unrelated port-list exercise previously in this folder.
 
 ## Working environment
 
@@ -38,13 +39,14 @@ interface. Here `127.0.0.1` names the current namespace, not a different host.
 Start in `starter/` and run `python3 main.py`. The working instrumentation in
 `network_lab.py` performs the experiment even while the analysis is unfinished.
 The JSON includes raw command output, actual endpoint and process identities,
-transport observations, and `analysis: null`. Complete only the marked
-`analyze(evidence)` function in `main.py`; keep the instrumentation unchanged.
-Write the explanation and command evidence in `network-notes.md`.
+transport observations, and `analysis: null`. For the required lab, leave the code unchanged and record the explanation and
+command evidence in `network-notes.md`. An optional Python extension completes
+the marked `analyze(evidence)` function in `main.py`; keep the instrumentation
+unchanged if choosing that extension. Python programming is not a prerequisite.
 
-The Python dictionary contract below makes the programming task explicit. The
-notebook is a separate explanation task. A returned dictionary does not grade
-that explanation. Keep the first run before editing, predict a changed case,
+The required project develops networking interpretation through the observed
+commands and notebook. The Python dictionary contract below is supplemental code
+practice. A returned dictionary does not grade the required explanation. Keep the first run before editing, predict a changed case,
 then run it and compare the observation with the prediction. The `solution/`
 folder provides one reference after an independent attempt or an agreed
 instructor checkpoint. It does not replace the commands and observations.
@@ -64,8 +66,9 @@ have finite deadlines, and the parent cleans up its owned worker on failure.
 
 ## Independent and instructor use
 
-Work through environment checks, prediction, untouched starter, implementation,
-changed case, and explanation in that order. In a paced session pause after the
+Work through environment checks, prediction, untouched starter, changed cases,
+and explanation in that order. If choosing the Python extension, implement its
+analysis function afterward and repeat the changed cases. In a paced session pause after the
 prediction and after the first raw evidence, before consulting the reference.
 The operations notebook continues this same core project and should retain its
 observations; it is not a second independent programming assignment. Additional
@@ -103,9 +106,10 @@ sender endpoint and the kernel's `MSG_TRUNC` flag, then echoes only received byt
 The final observations are emitted after both listening sockets close. The
 parent reaps the worker and records TCP and UDP listener tables again.
 
-## Analysis contract
+## Optional Python analysis extension
 
-Return these exact fields from the recorded worker evidence:
+The required lab uses the observations and notebook. For supplemental code
+practice, return these exact fields from the recorded worker evidence:
 
 - `tcpBytes`: byte length after concatenating and hex-decoding `tcpReadsHex`.
 - `tcpReadCalls`: number of nonempty recorded TCP reads.
@@ -143,9 +147,11 @@ and authentication over TCP. This pack sends its stated simple byte protocol; it
 does not claim to implement HTTP framing, SSH authentication, reliability tests,
 packet capture, internet reachability, or actual packet loss.
 
-Completion: correct results for all four cases, a notebook that distinguishes
-transport EOF from message completion and empty datagrams, exact byte evidence,
-matching kernel listener identities, and a reaped worker with closed sockets.
+Core completion: raw observations and a notebook covering all four cases,
+distinguishing transport EOF from message completion and empty datagrams, exact
+byte evidence, matching kernel listener identities, and a reaped worker with
+closed sockets. If choosing the Python extension, its returned fields must agree
+with those same observations.
 
 References: [Python socket API](https://docs.python.org/3/library/socket.html),
 [Linux TCP](https://man7.org/linux/man-pages/man7/tcp.7.html), and

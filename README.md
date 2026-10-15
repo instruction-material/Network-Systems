@@ -15,8 +15,11 @@ in COURSE_SOURCE_MANIFEST.md.
 
 Each has a complete guide and self-contained starter/reference roles. Begin with
 the starter; its instrumentation runs before the analysis TODO is completed.
-The notebook is a continuation of that core attempt. The reference explains the
-same contract without pretending to grade the learner's written explanation.
+The required work uses native commands, observations and the notebook; Python
+programming is not a prerequisite. The analysis TODO is supplemental code practice.
+The notebook continues the same core attempt. The completed test profile means
+that optional analysis code was supplied; it does not certify completion of the
+networking explanation.
 
 ## Source acceptance and remaining audit
 
