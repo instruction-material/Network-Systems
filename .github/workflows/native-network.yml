@@ -25,6 +25,8 @@ jobs:
         run: ./verify-course-source.sh
       - name: Exercise real owned Linux sockets and independent analyses
         run: python3 test/verify_foundations.py --proof output/network-foundations.json
+      - name: Exercise addressing, system name lookup and prefix boundary labs
+        run: python3 test/verify_naming.py --proof output/network-addressing.json
       - name: Retain native evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

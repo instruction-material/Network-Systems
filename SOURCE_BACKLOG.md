@@ -11,6 +11,6 @@ No inactive or support folders are currently outside active catalog links.
 - `test/` holds native acceptance tooling for the two introductory projects.
 - `.github/workflows/` runs that tooling in disposable Linux CI.
 
-These are support directories, not unassigned course projects. The 42 remaining
+These are support directories, not unassigned course projects. The 39 remaining
 generic Python pairs are active targets requiring content correction, not
 accepted work merely because their files exist.
