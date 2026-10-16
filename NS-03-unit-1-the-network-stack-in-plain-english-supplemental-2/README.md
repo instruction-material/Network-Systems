@@ -19,8 +19,8 @@ Windows use the Linux terminal in WSL. An editor window does not identify the
 terminal's execution host. No remote connection is created by this project.
 
 Both roles contain `main.py`, `transport_lab.py`, `case.json`, `network-notes.md`,
-and `edge-cases.md`. The shared README explains the investigation. Start with
-`starter/`. Keep its supplied instrumentation unchanged for this activity.
+and `edge-cases.md`. The shared README explains the investigation. Open
+`starter/` for the independent attempt and keep its instrumentation unchanged.
 
 The experiment creates a listener and client on `127.0.0.1` using a port chosen
 by the operating system, exchanges only its own data, closes its sockets and
