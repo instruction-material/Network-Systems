@@ -61,7 +61,9 @@ def command(argv, timeout=8, check=True):
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2) + "\n")
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2) + "\n")
+    os.replace(temporary, path)
 
 
 def require_isolation():
