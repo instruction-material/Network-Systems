@@ -5,6 +5,7 @@ import datetime
 import http.server
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -61,6 +62,13 @@ def command(args, records, check=True, timeout=8):
     return result
 
 
+def firewall_configuration(raw):
+    # Chain packet/byte counts advance with unrelated host traffic. Keep every
+    # chain name, policy, rule and rule order; discard only comments and counts.
+    return "\n".join(re.sub(r"^(:\S+ \S+) \[\d+:\d+\]$", r"\1", line)
+                     for line in raw.splitlines() if not line.startswith("#"))
+
+
 def snapshot(records):
     firewall = command(["iptables-save"], records)["stdout"]
     return {"networkNamespace": os.readlink("/proc/self/ns/net"),
@@ -69,8 +77,7 @@ def snapshot(records):
             "routes": command(["ip", "-j", "route", "show", "table", "all"], records)["stdout"],
             "namespaces": command(["ip", "netns", "list"], records)["stdout"],
             "forwarding": command(["sysctl", "-n", "net.ipv4.ip_forward"], records)["stdout"],
-            "firewall": "\n".join(line for line in firewall.splitlines()
-                                    if not line.startswith("#"))}
+            "firewallRaw": firewall, "firewall": firewall_configuration(firewall)}
 
 
 def serve(token):
@@ -248,7 +255,8 @@ def outside(args):
             if Path(inner_output).is_file():
                 result["lab"] = json.loads(Path(inner_output).read_text())
             result["hostAfter"] = snapshot(records)
-            result["hostUnchanged"] = before == result["hostAfter"]
+            result["hostUnchanged"] = all(value == result["hostAfter"][key]
+                                          for key, value in before.items() if key != "firewallRaw")
             output = Path(args.output).resolve()
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(json.dumps(result, indent=2) + "\n")

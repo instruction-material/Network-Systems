@@ -126,7 +126,10 @@ private `/run` contains only that run's namespace registry. Interface names fit
 Linux's 15-byte limit. The apparatus never preemptively deletes a host namespace.
 It stops and reaps its owned HTTP process, removes its owned namespaces, and
 compares the original host's interfaces, routes, forwarding and firewall rules
-before and after. Normal completion, reported errors and Ctrl-C use the cleanup
+before and after. The raw firewall snapshots retain packet counters; the
+configuration comparison ignores only timestamp comments and advancing chain
+counters, while preserving chain names, policies, all rules and their order.
+Normal completion, reported errors and Ctrl-C use the cleanup
 path. Output evidence remains available after the disposable network is removed.
 
 `Operation not permitted` from `unshare` means the VM/container policy does not

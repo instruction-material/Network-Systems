@@ -4,8 +4,10 @@ import ast
 import contextlib
 import datetime
 import hashlib
+import importlib.util
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -62,7 +64,8 @@ def host_state(records):
                        ("firewall", ["iptables-save"])):
         code, stdout, stderr = run(args, records)
         assert code == 0, stderr
-        values[name] = "\n".join(line for line in stdout.splitlines() if not line.startswith("#"))
+        values[name] = "\n".join(re.sub(r"^(:\S+ \S+) \[\d+:\d+\]$", r"\1", line)
+                                for line in stdout.splitlines() if not line.startswith("#"))
     values["networkNamespace"] = os.readlink("/proc/self/ns/net")
     values["mountNamespace"] = os.readlink("/proc/self/ns/mnt")
     return values
@@ -71,7 +74,7 @@ def host_state(records):
 def check_cleanup(data):
     differences = {key: {"before": value, "after": data["hostAfter"][key]}
                    for key, value in data["hostBefore"].items()
-                   if value != data["hostAfter"][key]}
+                   if key != "firewallRaw" and value != data["hostAfter"][key]}
     assert not differences and data["hostUnchanged"] is True, differences
     lab = data["lab"]
     assert lab["networkNamespace"] != data["hostBefore"]["networkNamespace"]
@@ -150,6 +153,17 @@ def verify(root, proof, source_only):
         guide = pack / "README.md"
         assert guide.read_bytes() == (pack / "starter/README.md").read_bytes()
         result["hashes"][str(guide.relative_to(root))] = hashlib.sha256(guide.read_bytes()).hexdigest()
+        spec = importlib.util.spec_from_file_location("ns6_runtime", pack / "starter/lab_runtime.py")
+        module = importlib.util.module_from_spec(spec)
+        sys.dont_write_bytecode = True
+        spec.loader.exec_module(module)
+        raw = "# Generated at one time\n*filter\n:OUTPUT ACCEPT [12:430]\n-A OUTPUT -p tcp --dport 8080 -j ACCEPT\nCOMMIT\n"
+        canonical = module.firewall_configuration(raw)
+        assert canonical == module.firewall_configuration(raw.replace("[12:430]", "[15:900]"))
+        assert canonical != module.firewall_configuration(raw.replace("OUTPUT ACCEPT", "OUTPUT DROP"))
+        assert canonical != module.firewall_configuration(raw.replace("8080", "18080"))
+        assert canonical != module.firewall_configuration(raw.replace(":OUTPUT", ":INPUT"))
+        result["firewallComparisonRegressionCases"] = 4
         if source_only:
             return result
         assert sys.platform == "linux" and os.geteuid() == 0
