@@ -53,3 +53,27 @@ jobs:
           path: output/
           if-no-files-found: error
           retention-days: 7
+
+  native-capstone:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare the owned routed-capstone tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 iproute2 iptables util-linux curl dnsutils tcpdump dnsmasq-base
+      - name: Check source inventory
+        run: ./verify-course-source.sh
+      - name: Verify actual capstone routing, DNS, proxy, policy, packet evidence and cleanup
+        run: sudo python3 test/verify_capstone.py --proof output/network-capstone.json
+      - name: Retain capstone source and native evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-capstone-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
