@@ -72,16 +72,18 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 186
+- Source-like files: 200
 
 ## Scoped Native Acceptance
 
 The workflow in `.github/workflows/native-network.yml` exercises two introductory
-foundations and three addressing/naming packs as an ordinary Linux user. It also
-contains a separate root-only NS6 router/NAT gate that enters disposable network
-and mount namespaces and verifies real requests plus cleanup. Source-only checks
-do not establish native acceptance; inspect the exact revision's retained evidence.
+foundations and three addressing/naming packs as an ordinary Linux user. Separate
+root-only gates exercise the owned NS6 router/NAT topology, NS5 HTTP capture and
+NS3 UFW policy in disposable Linux namespaces. The UFW gate checks actual fresh
+allow/deny requests, a nondefault management marker, prior-rule preservation,
+private policy rollback and interruption cleanup. Inspect the exact revision's
+retained native evidence; a source-only result is not native acceptance.
 
-The 39 remaining generic Python pairs and five other preserved shell projects
+The 39 remaining generic Python pairs and three other preserved shell projects
 are not certified by these scoped gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.

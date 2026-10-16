@@ -20,7 +20,7 @@ jobs:
       - name: Prepare ordinary Linux lab tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 iproute2 iptables util-linux curl openssh-client dnsutils traceroute tcpdump
+          sudo apt-get install -y python3 iproute2 iptables util-linux curl openssh-client dnsutils traceroute tcpdump ufw
       - name: Check source inventory
         run: ./verify-course-source.sh
       - name: Exercise real owned Linux sockets and independent analyses
@@ -31,6 +31,8 @@ jobs:
         run: sudo python3 test/verify_topology.py --proof output/network-topology.json
       - name: Exercise owned HTTP packet captures and bounded cleanup
         run: sudo python3 test/verify_capture.py --proof output/network-capture.json
+      - name: Exercise owned UFW allowances, denial, rollback and interruption
+        run: sudo python3 test/verify_ufw.py --proof output/network-ufw.json
       - name: Retain native evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
