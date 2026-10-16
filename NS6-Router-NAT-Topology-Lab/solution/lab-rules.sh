@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-stage="${1:?expected forwarding, snat, or dnat}"
+stage="${1:?expected forwarding, snat, dnat, or filter}"
 router="${2:?expected the owned router namespace}"
 case "$stage" in
   forwarding)
@@ -15,6 +15,15 @@ case "$stage" in
     ip netns exec "$router" iptables -t nat -A PREROUTING \
       -i rl0 -d 10.10.0.1/32 -p tcp --dport 18080 \
       -j DNAT --to-destination 10.20.0.2:8080
+    ;;
+  filter)
+    ip netns exec "$router" iptables -P FORWARD DROP
+    ip netns exec "$router" iptables -A FORWARD -m conntrack \
+      --ctstate ESTABLISHED,RELATED -j ACCEPT
+    ip netns exec "$router" iptables -A FORWARD \
+      -i rl0 -o rr0 -s 10.10.0.0/24 -d 10.20.0.2/32 -p tcp --dport 8080 \
+      -m conntrack --ctstate NEW --ctdir ORIGINAL \
+      --ctorigdst 10.10.0.1 --ctorigdstport 18080 -j ACCEPT
     ;;
   *) printf 'Unknown stage: %s\n' "$stage" >&2; exit 2 ;;
 esac
