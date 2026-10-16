@@ -1,40 +1,42 @@
-#################
-#   CONSTANTS   #
-#################
+"""Collect the actual IPv6 lab without requiring Python implementation."""
+import argparse
+import json
+import signal
+import sys
 
-MIN_PORT = 1
-MAX_PORT = 65535
-SAMPLE_PORT_VALUES = ["22", "443", "8080", "bad"]
-
-
-#################
-#   FUNCTIONS   #
-#################
+import ipv6_lab
 
 
-def normalize_ports(raw_values: list[str]) -> list[int]:
-    """Convert valid numeric port strings into port numbers"""
-    normalized_ports: list[int] = []
-
-    # Check each raw value before converting it into an integer
-    for raw_value in raw_values:
-        # Skip values that are not decimal port numbers
-        if not raw_value.isdigit():
-            continue
-
-        port = int(raw_value)
-
-        # Keep only ports inside the valid TCP and UDP range
-        if MIN_PORT <= port <= MAX_PORT:
-            normalized_ports.append(port)
-
-    return normalized_ports
+def analyze(evidence):
+    v6 = next(row for row in evidence["ready"]["listeners"] if row["family"] == 10)
+    return {"ipv6Endpoint": v6,
+            "observedResponseFamilies": [row["family"] for row in evidence["probes"] if row["exitCode"] == 0],
+            "namespace": evidence["environment"]["networkNamespace"]}
 
 
-def main() -> None:
-    """Print the normalized sample ports"""
-    print(normalize_ports(SAMPLE_PORT_VALUES))
+def interrupted(signum, _frame):
+    raise SystemExit(128 + signum)
+
+
+def main():
+    signal.signal(signal.SIGTERM, interrupted)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--binding", choices=("v6-only", "paired"), default='v6-only')
+    parser.add_argument("--message", default="Owned IPv6 observation")
+    parser.add_argument("--prefix", default='::1/128')
+    parser.add_argument("--candidates", default='::,::1,::2')
+    args = parser.parse_args()
+    evidence = {}
+    try:
+        ipv6_lab.observe(args.message, args.binding, args.prefix, args.candidates, evidence)
+        evidence["analysis"] = analyze(evidence)
+    except (OSError, ValueError, TimeoutError) as error:
+        print(json.dumps({"error": str(error), "evidence": evidence}, ensure_ascii=True, indent=2))
+        print(str(error), file=sys.stderr)
+        return 2
+    print(json.dumps(evidence, ensure_ascii=True, indent=2))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
