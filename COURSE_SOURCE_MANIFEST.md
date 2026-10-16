@@ -72,7 +72,7 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 240
+- Source-like files: 265
 
 ## Scoped Native Acceptance
 
@@ -104,6 +104,8 @@ neighbor/policy/configuration reasoning. The native gate covers the actual
 loopback observations and optional analyses; it does not certify active Neighbor
 Discovery, Router Advertisement, DHCPv6, firewall policy or notebook completion.
 
-The workflow has scoped native gates for NS1-NS6 and these IPv6 packs. The 36
+The workflow has scoped native gates for NS1-NS6 and these IPv6 packs. The 33
 remaining generic Python pairs are not certified by these gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.
+
+Three application-protocol packs supply actual HTTP requests/responses, independent conditional-request and response-policy tasks, exact binary bytes, an owned held-port refusal and complete source guides. Their ordinary-user native gate retains raw wire bytes, curl corroboration, process identity and cleanup. Supplied DNS/TLS/SSH cases are constructed; notebook completion is not inferred.
