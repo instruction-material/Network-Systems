@@ -77,3 +77,27 @@ jobs:
           path: output/
           if-no-files-found: error
           retention-days: 7
+
+  native-setup-optional:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare the ordinary-user command tracing tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 bash strace
+      - name: Check source inventory
+        run: ./verify-course-source.sh
+      - name: Verify actual command context, shell argument boundaries and cleanup
+        run: python3 test/verify_setup_optional.py --proof output/network-setup-optional.json
+      - name: Retain setup source and native execution evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-setup-optional-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
