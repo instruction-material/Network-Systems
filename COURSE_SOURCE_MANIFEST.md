@@ -124,3 +124,15 @@ regressions and a live interruption/isolation check. All prior native cohorts
 remain required. `network-notes.md` and `edge-cases.md` need actual observations;
 code success does not establish their completion. Source/native acceptance and
 site import integration are separate gates.
+
+## Optional setup context and argument investigations
+
+The NS0 transfer pack now diagnoses actual command selection and child working
+directory independently. Its separate extension compares direct argv with real
+quoted/unquoted Bash expansion. Both use ordinary-user owned fixtures, complete
+guides, case configuration and evidence notebooks. The reference and independent
+completed source differ from the starter only in case.json. Native verification
+retains actual execve/chdir traces, twelve role/fixture profiles, a one-field
+correction, refusal cases and controlled regressions. All previous Linux and
+capstone cohorts remain required. Runtime success does not infer notebook
+completion; site import integration is a separate gate.
