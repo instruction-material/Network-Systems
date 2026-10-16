@@ -356,7 +356,7 @@ def main():
         return 0
 
     def interrupted(signum, _frame):
-        raise InterruptedError(f"interrupted by signal {signum}")
+        raise RuntimeError(f"interrupted by signal {signum}")
 
     signal.signal(signal.SIGTERM, interrupted)
     signal.signal(signal.SIGINT, interrupted)

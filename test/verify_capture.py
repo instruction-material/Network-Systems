@@ -193,10 +193,10 @@ def verify(root, proof, source_only):
                     status, stdout, stderr = run(argv, ledger)
                     assert status == 0, (stdout, stderr, output.read_text() if output.exists() else "no report")
                     data = json.loads(output.read_text())
+                    result["runs"].append({"profile": name, "status": status, "stdout": stdout, "stderr": stderr, "evidence": data})
                     observed, sent = check_run(data, complete, "normal", reverse)
                     frames += observed
                     requests += sent
-                    result["runs"].append({"profile": name, "status": status, "stdout": stdout, "stderr": stderr, "evidence": data})
             for mode in ("failure", "hold"):
                 work = Path(temp) / (mode + " quoted workspace")
                 shutil.copytree(pack / "solution", work)
@@ -207,10 +207,10 @@ def verify(root, proof, source_only):
                 status, stdout, stderr = run(argv, ledger, ready if mode == "hold" else None)
                 assert status != 0 and output.exists(), (stdout, stderr)
                 data = json.loads(output.read_text())
+                result["runs"].append({"profile": mode, "status": status, "stdout": stdout, "stderr": stderr, "evidence": data})
                 observed, sent = check_run(data, True, mode, False)
                 frames += observed
                 requests += sent
-                result["runs"].append({"profile": mode, "status": status, "stdout": stdout, "stderr": stderr, "evidence": data})
             sentinel = Path(temp) / "outside"
             sentinel.write_text("outside content remains unchanged\n")
             link = Path(temp) / "output-symlink"
