@@ -72,7 +72,7 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 200
+- Source-like files: 205
 
 ## Scoped Native Acceptance
 
@@ -84,6 +84,11 @@ allow/deny requests, a nondefault management marker, prior-rule preservation,
 private policy rollback and interruption cleanup. Inspect the exact revision's
 retained native evidence; a source-only result is not native acceptance.
 
-The 39 remaining generic Python pairs and three other preserved shell projects
-are not certified by these scoped gates. `test/` and `.github/workflows/` are
+The NS2 reachability gate also uses owned ordinary-user HTTP services, IPv4/IPv6
+literals, changed ports, refusal, application deadlines and a controlled hung
+command. It distinguishes TCP connection from application response and does not
+claim a second-machine path or inspect privileged firewall policy.
+
+The 39 remaining generic Python pairs and two other preserved shell projects
+(NS1 and NS4) are not certified by these scoped gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.

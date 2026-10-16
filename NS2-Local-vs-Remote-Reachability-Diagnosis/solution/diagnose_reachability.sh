@@ -1,67 +1,63 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#################
-#   CONSTANTS   #
-#################
-readonly DEFAULT_HOST="127.0.0.1"
-readonly DEFAULT_PORT="8080"
-readonly DEFAULT_SCHEME="http"
-readonly CURL_TIMEOUT_SECONDS="3"
-readonly -a REQUIRED_COMMANDS=(ss ip curl nc)
-
-#################
-#   FUNCTIONS   #
-#################
-# Require one command before the diagnosis tries to use it
-check_command() {
-	# Stop early when a required diagnostic command is missing
-	if ! command -v "$1" >/dev/null 2>&1; then
-		echo "missing required command: $1" >&2
-		exit 1
-	fi
+usage() {
+    echo "usage: bash diagnose_reachability.sh [HOST [PORT [http|https]]]" >&2
+    exit 2
 }
-
-#################
-#   MAIN CODE   #
-#################
-# Read optional target settings from the command line
-host="${1:-$DEFAULT_HOST}"
-port="${2:-$DEFAULT_PORT}"
-scheme="${3:-$DEFAULT_SCHEME}"
-probe_url="${scheme}://${host}:${port}"
-
-# Verify every command needed for the diagnosis
-for required_command in "${REQUIRED_COMMANDS[@]}"; do
-	check_command "$required_command"
+[[ $# -le 3 ]] || usage
+host="${1:-127.0.0.1}"
+port="${2:-8080}"
+scheme="${3:-http}"
+[[ "$host" =~ ^[[:alnum:]_:.][-[:alnum:]_.:]*$ ]] || usage
+[[ "$port" =~ ^[0-9]{1,5}$ ]] || usage
+port=$((10#$port))
+((port >= 1 && port <= 65535)) || usage
+[[ "$scheme" == http || "$scheme" == https ]] || usage
+[[ $(uname -s) == Linux ]] || { echo 'This exercise requires Linux.' >&2; exit 2; }
+for tool in timeout ss curl nc ip; do
+    command -v "$tool" >/dev/null || { echo "missing required command: $tool" >&2; exit 2; }
 done
 
-echo "== listener state =="
-ss -ltnp "( sport = :$port )" || true
-echo
+# A failed diagnostic is evidence. Retain its status and continue the checklist.
+# The outer deadline also bounds resolver stalls and the TCP diagnostic.
+probe() {
+    local label="$1" status=0
+    shift
+    printf '\n== %s ==\n' "$label"
+    printf 'command:'
+    printf ' %q' "$@"
+    printf '\n'
+    timeout --signal=TERM --kill-after=1s 5s "$@" || status=$?
+    printf '\ncommand status: %s\n' "$status"
+}
+authority="$host"
+local_authority=127.0.0.1
+if [[ "$host" == *:* ]]; then
+    authority="[$host]"
+    local_authority='[::1]'
+fi
+printf 'Read-only diagnostics from this machine. A target probe here is not a second-machine test.\n'
+printf 'Target: %s://%s:%s/\n' "$scheme" "$authority" "$port"
+probe 'TCP listener state on this machine' ss -ltnp "sport = :$port"
 
-echo "== interface summary =="
-ip addr show
-echo
+# TASK-BEGIN route-evidence
+probe 'Interface summary on this machine' ip -brief address
+probe 'IPv4 routes on this machine' ip -4 route show
+probe 'IPv6 routes on this machine' ip -6 route show
+# TASK-END route-evidence
 
-echo "== route summary =="
-ip route show
-echo
+probe 'Loopback HTTP observation on this machine' curl --noproxy '*' --connect-timeout 2 --max-time 3 --silent --show-error --head "$scheme://$local_authority:$port/"
+probe 'Target HTTP observation from this machine' curl --noproxy '*' --connect-timeout 2 --max-time 3 --silent --show-error --head "$scheme://$authority:$port/"
+probe 'Target TCP observation from this machine' nc -vz -w 3 "$host" "$port"
 
-echo "== localhost probe =="
-curl --max-time "$CURL_TIMEOUT_SECONDS" -I "http://127.0.0.1:$port" || true
-echo
+cat <<'NOTES'
 
-echo "== remote-style probe to $probe_url =="
-curl --max-time "$CURL_TIMEOUT_SECONDS" -I "$probe_url" || true
-echo
-
-echo "== raw TCP probe =="
-nc -vz "$host" "$port" || true
-echo
-
-echo "== interpretation checklist =="
-echo "- timeout: likely path, firewall, or no-return traffic problem"
-echo "- refusal: destination reachable but nothing is listening there"
-echo "- reset: TCP conversation started and was actively closed"
-echo "- if localhost works but remote host fails, compare bind address, route, and firewall state before editing the app"
+Review the command statuses and raw errors before drawing conclusions.
+A TCP connection can succeed while an HTTP or TLS exchange fails.
+A timeout alone does not locate a firewall or routing fault; a refusal can also
+come from a rejecting policy. A reset does not establish application readiness.
+Compare binding, addresses, routes and authorized firewall observations, then
+repeat from a separate authorized machine before claiming remote reachability.
+No service, route, interface, firewall rule or resolver configuration was changed.
+NOTES
