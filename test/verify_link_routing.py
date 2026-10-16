@@ -236,10 +236,12 @@ def descendants(pid):
     while pending:
         current = pending.pop()
         path = Path("/proc/" + str(current) + "/task/" + str(current) + "/children")
-        if path.exists():
+        try:
             children = [int(p) for p in path.read_text().split()]
-            result.extend(children)
-            pending.extend(children)
+        except FileNotFoundError:
+            continue
+        result.extend(children)
+        pending.extend(children)
     return result
 
 
@@ -254,13 +256,16 @@ def interrupt(folder, signum, records):
         while time.monotonic() < deadline and child.poll() is None:
             for pid in descendants(child.pid):
                 cmdline = Path("/proc/" + str(pid) + "/cmdline")
-                if not cmdline.exists():
+                try:
+                    parts = cmdline.read_bytes().decode().split("\0")
+                except FileNotFoundError:
                     continue
-                parts = cmdline.read_bytes().decode().split("\0")
                 if "--inside" in parts and "--inner-output" in parts:
                     path = Path(parts[parts.index("--inner-output") + 1]).with_name("ready.json")
-                    if path.is_file():
+                    try:
                         marker = json.loads(path.read_text())
+                    except FileNotFoundError:
+                        continue
             if marker:
                 break
             time.sleep(0.02)
