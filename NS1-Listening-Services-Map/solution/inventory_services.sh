@@ -1,54 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#################
-#   CONSTANTS   #
-#################
-readonly DEFAULT_OUTPUT_FILE="listening-services-report.md"
-readonly -a REQUIRED_COMMANDS=(ss lsof)
-
-#################
-#   FUNCTIONS   #
-#################
-# Require one command before the report tries to use it
-require_command() {
-	# Stop early when a required diagnostic command is missing
-	if ! command -v "$1" >/dev/null 2>&1; then
-		echo "missing required command: $1" >&2
-		exit 1
-	fi
+usage() {
+    echo 'usage: bash inventory_services.sh [PORT]' >&2
+    exit 2
 }
-
-#################
-#   MAIN CODE   #
-#################
-# Read the optional report path from the command line
-output_file="${1:-$DEFAULT_OUTPUT_FILE}"
-
-# Verify every command needed for the inventory
-for required_command in "${REQUIRED_COMMANDS[@]}"; do
-	require_command "$required_command"
+[[ $# -le 1 ]] || usage
+port="${1:-}"
+if [[ -n "$port" ]]; then
+    [[ "$port" =~ ^[0-9]{1,5}$ ]] || usage
+    port=$((10#$port))
+    ((port >= 1 && port <= 65535)) || usage
+fi
+[[ $(uname -s) == Linux ]] || { echo 'This exercise requires Linux.' >&2; exit 2; }
+for tool in timeout ss lsof readlink; do
+    command -v "$tool" >/dev/null || { echo "missing required command: $tool" >&2; exit 2; }
 done
+probe() {
+    local label="$1" status=0
+    shift
+    printf '\n== %s ==\n' "$label"
+    printf 'command:'
+    printf ' %q' "$@"
+    printf '\n'
+    timeout --signal=TERM --kill-after=1s 5s "$@" || status=$?
+    printf '\ncommand status: %s\n' "$status"
+}
+socket_filter=()
+if [[ -n "$port" ]]; then
+    socket_filter=("sport = :$port")
+fi
+printf '# Listening services evidence\n'
+printf 'Read-only view on this machine for this account; selected port: %s\n' "${port:-all}"
+probe 'Current network namespace' readlink /proc/self/ns/net
 
-# Build the listener report with command output and review prompts
-{
-	echo "# Listening Services Report"
-	echo
-	echo "Generated: $(date -u)"
-	echo
-	echo "## TCP listeners with process mapping"
-	ss -ltnp
-	echo
-	echo "## UDP listeners with process mapping"
-	ss -lunp
-	echo
-	echo "## Open internet sockets from lsof"
-	lsof -nP -iTCP -sTCP:LISTEN
-	echo
-	echo "## Review checklist"
-	echo "- Which listeners are expected for this host role?"
-	echo "- Which listeners should be limited by firewall policy?"
-	echo "- Which listeners require a remote test before claiming they are reachable?"
-} >"$output_file"
+# TASK-BEGIN inventory-sections
+probe 'TCP listener view' ss -ltnp "${socket_filter[@]}"
+probe 'UDP socket view' ss -lunp "${socket_filter[@]}"
+probe 'TCP descriptor ownership' lsof -nP "-iTCP${port:+:$port}" -sTCP:LISTEN
+probe 'UDP descriptor ownership' lsof -nP "-iUDP${port:+:$port}"
+# TASK-END inventory-sections
 
-echo "Wrote solution report to $output_file"
+cat <<'REVIEW'
+
+## Review the inventory
+An empty selection can produce lsof status 1; inspect its stderr and the ss view
+before distinguishing an empty view from an error or limited permission.
+Missing owner text does not prove that no process owns a socket.
+Classify each observed service as expected, internal-only or review-needed and
+record the evidence supporting the choice. UDP UNCONN is not TCP LISTEN.
+A local socket inventory does not prove another machine can reach the service.
+The script changed no service, route, interface or firewall configuration.
+REVIEW
