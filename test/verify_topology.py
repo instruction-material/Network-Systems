@@ -69,7 +69,10 @@ def host_state(records):
 
 
 def check_cleanup(data):
-    assert data["hostBefore"] == data["hostAfter"] and data["hostUnchanged"] is True
+    differences = {key: {"before": value, "after": data["hostAfter"][key]}
+                   for key, value in data["hostBefore"].items()
+                   if value != data["hostAfter"][key]}
+    assert not differences and data["hostUnchanged"] is True, differences
     lab = data["lab"]
     assert lab["networkNamespace"] != data["hostBefore"]["networkNamespace"]
     assert lab["mountNamespace"] != data["hostBefore"]["mountNamespace"]
@@ -168,6 +171,8 @@ def verify(root, proof, source_only):
                         "--test-mode", mode, "--ready-file", str(ready)]
                 code, stdout, stderr = run(args, records, ready if mode == "cancellation" else None)
                 data = json.loads(output.read_text())
+                result["runs"].append({"profile": profile, "exitCode": code,
+                                        "stdout": stdout, "stderr": stderr, "evidence": data})
                 check_cleanup(data)
                 assert host_state(records) == host_before
                 if mode == "normal":
@@ -176,8 +181,6 @@ def verify(root, proof, source_only):
                 else:
                     assert code != 0 and "error" in data["lab"]
                     assert not data["lab"]["complete"]
-                result["runs"].append({"profile": profile, "exitCode": code,
-                                        "stdout": stdout, "stderr": stderr, "evidence": data})
         # Direct internal entry must refuse the host before any mounting or changes.
         code, _, stderr = run([sys.executable, str(pack / "solution/lab_runtime.py"),
                                "--inside", os.readlink("/proc/self/ns/net")], records)
