@@ -65,6 +65,9 @@ The reference uses 64 as its upper packet limit. The starter deliberately
 leaves these choices incomplete so its capture also exposes the independent
 conversation on port 8081 and its analysis reports `complete: false`.
 
+The capture uses `-p` so it does not request promiscuous interface mode,
+even inside this isolated loopback lab.
+
 The supplied capture and readback commands already use `-nn` to keep
 address and port display numeric. Inspect the recorded command and decoded
 endpoints. A name-display option does not change the raw IPv4 or TCP headers.

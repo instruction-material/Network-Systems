@@ -223,7 +223,7 @@ def inside(args):
             assert lab["workerReady"]["pid"] == worker.pid and lab["workerReady"]["token"] == args.token
             assert lab["workerReady"]["networkNamespace"] == lab["networkNamespace"]
             expression = "tcp and host 127.0.0.1" + (" and port 8080" if settings["filterPort"] else "")
-            capture_argv = ["tcpdump", "--immediate-mode", "-Z", "root", "-U", "-s", "0", "-i", "lo",
+            capture_argv = ["tcpdump", "--immediate-mode", "-p", "-Z", "root", "-U", "-s", "0", "-i", "lo",
                             "-nn", "-w", str(pcap)]
             if settings["packetLimit"]:
                 capture_argv += ["-c", str(settings["packetLimit"])]

@@ -117,6 +117,7 @@ def check_run(data, complete, mode, reverse):
     capture = next(row for row in lab["commands"] if row["pid"] == lab["capture"]["pid"])
     argv = capture["command"]
     assert argv[:2] == ["tcpdump", "--immediate-mode"] and argv[argv.index("-i") + 1] == "lo"
+    assert "-p" in argv
     assert argv[-1] == "tcp and host 127.0.0.1" + (" and port 8080" if complete else "")
     assert "-nn" in argv and (("-c" in argv) is complete)
     if complete:
