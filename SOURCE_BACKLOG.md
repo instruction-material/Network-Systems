@@ -4,11 +4,11 @@ This ledger records top-level source folders that are present in the repository 
 
 Promotion rule: move a folder out of this ledger only after the course text names where it belongs, whether it is starter or solution material, and how the student or tutor verifies it.
 
-No inactive or support folders are currently outside active catalog links.
+Every learner project folder is linked from the catalog. The validation directories below are support tools.
 
 ## Validation Support
 
-- `test/` holds native acceptance tooling for introductory, addressing/naming, isolated router/NAT and owned HTTP capture projects.
+- `test/` holds native acceptance tooling for introductory, addressing/naming, isolated router/NAT, owned HTTP capture and isolated UFW policy projects.
 - `.github/workflows/` runs that tooling in disposable Linux CI.
 
 These are support directories, not unassigned course projects. The 39 remaining
