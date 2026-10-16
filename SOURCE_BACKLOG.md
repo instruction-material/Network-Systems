@@ -11,6 +11,6 @@ Every learner project folder is linked from the catalog. The validation director
 - `test/` holds native acceptance tooling for introductory, addressing/naming, isolated router/NAT, owned HTTP capture and isolated UFW policy, IPv6 and application-protocol projects.
 - `.github/workflows/` runs that tooling in disposable Linux CI.
 
-These are support directories, not unassigned course projects. The 33 remaining
+These are support directories, not unassigned course projects. The 30 remaining
 generic Python pairs are active targets requiring content correction, not
 accepted work merely because their files exist.

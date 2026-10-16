@@ -72,7 +72,7 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 265
+- Source-like files: 290
 
 ## Scoped Native Acceptance
 
@@ -104,8 +104,10 @@ neighbor/policy/configuration reasoning. The native gate covers the actual
 loopback observations and optional analyses; it does not certify active Neighbor
 Discovery, Router Advertisement, DHCPv6, firewall policy or notebook completion.
 
-The workflow has scoped native gates for NS1-NS6 and these IPv6 packs. The 33
+The workflow has scoped native gates for NS1-NS6 and these IPv6 packs. The 30
 remaining generic Python pairs are not certified by these gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.
 
 Three application-protocol packs supply actual HTTP requests/responses, independent conditional-request and response-policy tasks, exact binary bytes, an owned held-port refusal and complete source guides. Their ordinary-user native gate retains raw wire bytes, curl corroboration, process identity and cleanup. Supplied DNS/TLS/SSH cases are constructed; notebook completion is not inferred.
+
+Three Unit3 observation packs now distinguish a real Linux bridge, routed gateway/return paths, SNAT and destination/port mapping in owned network/mount namespaces. Complete guides keep this introductory observation purpose distinct from later NS6 command editing and Unit12 policy work. Native acceptance retains actual MAC/FDB, routes, raw HTTP, endpoint views, host comparisons and cleanup; it does not infer notebook completion or Internet reachability.
