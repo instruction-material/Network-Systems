@@ -8,7 +8,7 @@ No inactive or support folders are currently outside active catalog links.
 
 ## Validation Support
 
-- `test/` holds native acceptance tooling for the two introductory projects.
+- `test/` holds native acceptance tooling for the introductory, addressing/naming and isolated router/NAT projects.
 - `.github/workflows/` runs that tooling in disposable Linux CI.
 
 These are support directories, not unassigned course projects. The 39 remaining
