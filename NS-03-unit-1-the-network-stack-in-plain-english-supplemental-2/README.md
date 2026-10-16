@@ -80,7 +80,7 @@ prove that every intended application record was complete.
 Exit status zero checks the apparatus's application contract. It does not
 complete `network-notes.md`. Keep predictions, observed command/report names,
 the configuration change, a byte-level explanation, and one limitation there.
-Use `edge-cases.md` to explain what a decoder should do with a partial length,
+Use `edge-cases.md` to explain how a decoder handles a partial length,
 a partial payload, or an invalid advertised size. Those reasoning cases are
 not claims that this trial sent malformed input.
 
@@ -105,7 +105,7 @@ of a remote firewall or DNS problem. The finite socket deadlines and cleanup
 checks bound each trial. If a run fails, keep its report and command before
 trying a new filename in a suitable owned Linux environment.
 
-## Independent and instructor checkpoints
+## Independent and paced checkpoints
 
 Independently, complete the prediction, baseline, correction, alternate and
 explanation before consulting `solution/`. In a paced session pause after the

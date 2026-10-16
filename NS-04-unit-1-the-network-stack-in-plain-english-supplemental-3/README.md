@@ -128,7 +128,7 @@ and explicit cleanup bound the owned experiment. Preserve failed evidence,
 correct the local environment or selected case, and choose a fresh report
 filename for recovery.
 
-## Independent and instructor checkpoints
+## Independent and paced checkpoints
 
 Independently, finish the queue prediction, consuming baseline, peeking
 correction, alternate trial and explanation before consulting `solution/`.
