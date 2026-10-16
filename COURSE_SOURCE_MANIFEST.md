@@ -72,7 +72,7 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 210
+- Source-like files: 215
 
 ## Scoped Native Acceptance
 
@@ -93,6 +93,11 @@ The NS1 listener gate observes owned TCP and UDP sockets, visible process
 ownership, filtered and broader views, empty selections and process cleanup
 without sending service probes. Its command helper is the unchanged NS2 verifier.
 
-The 39 remaining generic Python pairs and the preserved NS4 DNS comparison
-are not certified by these scoped gates. `test/` and `.github/workflows/` are
+The NS4 resolution gate observes an owned unprivileged DNS server and separate
+system NSS lookups. It retains typed records, negative DNS answers, transport
+failures and resolver cleanup without changing system name-service files. DNS
+answer families do not certify application reachability.
+
+The workflow has scoped native gates for NS1-NS6. The 39 remaining generic
+Python pairs are not certified by these gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.
