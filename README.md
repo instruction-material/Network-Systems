@@ -34,8 +34,8 @@ starter, completed starter and reference roles. Its 48 cases include 33 real own
 network experiments and fifteen invalid-input refusals. A passing presence check is
 not a substitute for those native observations.
 
-The other 39 generic Python starter/reference pairs remain under content audit;
-this change does not certify them. The six earlier shell projects below are
+The remaining 25 generic optional starter/reference pairs remain under content
+audit. Acceptance of the replaced packs does not certify those other contexts. The six earlier shell projects below are
 preserved and have separate goals and tooling requirements:
 
 1. NS1-Listening-Services-Map
@@ -55,3 +55,26 @@ the browser workspace is an editor and export path for this native work.
 The required Unit 2 pack observes an actual local endpoint and operating-system name lookup. Its two supplemental packs transfer prefix boundary reasoning to /31 and /32 and compare address families. Each has a complete guide, working instrumentation, an evidence notebook and an optional analysis function.
 
 Run python3 test/verify_naming.py --proof output/network-addressing.json as an ordinary Linux user for native acceptance. Source-only checking uses --source-only and never marks native acceptance. The native gate records 45 real owned HTTP experiments and 45 pre-experiment input refusals.
+
+
+## Optional application record and queue investigations
+
+The Unit 1 transfer pack
+`NS-03-unit-1-the-network-stack-in-plain-english-supplemental-2` investigates
+length-prefixed application records across partial TCP reads. The separate
+extension pack
+`NS-04-unit-1-the-network-stack-in-plain-english-supplemental-3` investigates a
+UDP diagnostic that consumes a queued datagram and a peeking correction. Each
+includes a complete guide, a case configuration, evidence notebook and named
+reasoning cases. The apparatus is prewritten; programming is optional.
+
+These optional activities keep their own attempts and do not replace the
+required Unit 1 transport project. Starter and reference apparatus match;
+`case.json` is the only completion difference. Successful runtime checks do not
+complete either notebook. In an ordinary Linux account with Python 3.10+ and
+strace, run the native gate with:
+
+    python3 test/verify_transport_optional.py --proof output/network-transport-optional.json
+
+The gate retains real socket observations, raw syscall traces, process records,
+source hashes, unfinished attempts, controlled regressions and input refusals.
