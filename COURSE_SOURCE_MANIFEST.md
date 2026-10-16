@@ -72,7 +72,7 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 205
+- Source-like files: 210
 
 ## Scoped Native Acceptance
 
@@ -89,6 +89,10 @@ literals, changed ports, refusal, application deadlines and a controlled hung
 command. It distinguishes TCP connection from application response and does not
 claim a second-machine path or inspect privileged firewall policy.
 
-The 39 remaining generic Python pairs and two other preserved shell projects
-(NS1 and NS4) are not certified by these scoped gates. `test/` and `.github/workflows/` are
+The NS1 listener gate observes owned TCP and UDP sockets, visible process
+ownership, filtered and broader views, empty selections and process cleanup
+without sending service probes. Its command helper is the unchanged NS2 verifier.
+
+The 39 remaining generic Python pairs and the preserved NS4 DNS comparison
+are not certified by these scoped gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.
