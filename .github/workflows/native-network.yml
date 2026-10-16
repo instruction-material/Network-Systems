@@ -101,3 +101,27 @@ jobs:
           path: output/
           if-no-files-found: error
           retention-days: 7
+
+  native-transport-optional:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare the ordinary-user socket tracing tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 strace
+      - name: Check source inventory
+        run: ./verify-course-source.sh
+      - name: Verify application record framing, UDP queue observations and cleanup
+        run: python3 test/verify_transport_optional.py --proof output/network-transport-optional.json
+      - name: Retain transport source and native socket evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-transport-optional-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
