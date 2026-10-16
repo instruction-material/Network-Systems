@@ -17,8 +17,9 @@ required to run the supplied script. Process names may be hidden when this
 account cannot inspect the listener's owner; missing process text does not
 mean no process exists.
 
-Open the selected starter in the site IDE, review the import choice, save the
-files and download the ZIP. Extract it, open a terminal and enter `starter/`.
+Open the selected role in the site IDE, review the import choice, save the
+files and download the ZIP. Extract it, open a terminal and enter the selected role folder: `starter/` for
+the learner attempt or `solution/` for the reference.
 The IDE is the editor and saved notebook; these Linux commands execute in the
 external Linux environment. Keep each report under a fresh filename so that
 earlier observations remain available. The reference belongs to a separate
