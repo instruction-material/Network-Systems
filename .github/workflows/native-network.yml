@@ -20,13 +20,15 @@ jobs:
       - name: Prepare ordinary Linux lab tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 iproute2 iptables util-linux curl openssh-client dnsutils traceroute tcpdump ufw
+          sudo apt-get install -y python3 iproute2 iptables util-linux curl openssh-client dnsutils traceroute tcpdump ufw netcat-openbsd
       - name: Check source inventory
         run: ./verify-course-source.sh
       - name: Exercise real owned Linux sockets and independent analyses
         run: python3 test/verify_foundations.py --proof output/network-foundations.json
       - name: Exercise addressing, system name lookup and prefix boundary labs
         run: python3 test/verify_naming.py --proof output/network-addressing.json
+      - name: Exercise bounded HTTP and TCP reachability diagnostics
+        run: python3 test/verify_reachability.py --proof output/network-reachability.json
       - name: Exercise isolated forwarding, real NAT and interruption cleanup
         run: sudo python3 test/verify_topology.py --proof output/network-topology.json
       - name: Exercise owned HTTP packet captures and bounded cleanup
