@@ -34,7 +34,7 @@ starter, completed starter and reference roles. Its 48 cases include 33 real own
 network experiments and fifteen invalid-input refusals. A passing presence check is
 not a substitute for those native observations.
 
-The remaining 25 generic optional starter/reference pairs remain under content
+The remaining 23 generic optional starter/reference pairs remain under content
 audit. Acceptance of the replaced packs does not certify those other contexts. The six earlier shell projects below are
 preserved and have separate goals and tooling requirements:
 
@@ -78,3 +78,23 @@ strace, run the native gate with:
 
 The gate retains real socket observations, raw syscall traces, process records,
 source hashes, unfinished attempts, controlled regressions and input refusals.
+
+## Optional socket inventory investigations
+
+Unit 4's transfer activity compares listening-only and all-socket views before
+and after an owned UDP socket selects its default peer. Its separate extension
+tracks one inherited TCP listener across two process owners and closing stages.
+Both retain full readings, prewritten apparatus, evidence notebooks and named
+reasoning cases. They keep separate optional attempts and do not replace the
+required passive listening-services map. Programming is optional. Only case.json
+differs between the learner and completed reference roles; runtime checks do
+not complete either notebook.
+
+In an ordinary Linux account with Python 3.10+, iproute2 and strace, run:
+
+    python3 test/verify_listener_optional.py --proof output/network-listener-optional.json
+
+The native gate retains raw inventories, socket descriptor identities, actual
+token exchanges, process records and syscall traces. It checks unfinished and
+completed attempts, changed tokens, wrong analysis choices, cleanup and refusals
+before socket creation. Source-only checking never certifies native acceptance.
