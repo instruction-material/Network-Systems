@@ -72,7 +72,7 @@ Canonical source repository: `Network-Systems`
 - Top-level course folders: 50
 - Active linked folders: 50
 - Ledgered inactive/support folders: 2
-- Source-like files: 215
+- Source-like files: 240
 
 ## Scoped Native Acceptance
 
@@ -98,6 +98,12 @@ system NSS lookups. It retains typed records, negative DNS answers, transport
 failures and resolver cleanup without changing system name-service files. DNS
 answer families do not certify application reachability.
 
-The workflow has scoped native gates for NS1-NS6. The 39 remaining generic
-Python pairs are not certified by these gates. `test/` and `.github/workflows/` are
+Three IPv6 packs now supply an ordinary-account IPv6-only/paired endpoint
+experiment, independent /126-/127-/128 calculations and explicit supplied
+neighbor/policy/configuration reasoning. The native gate covers the actual
+loopback observations and optional analyses; it does not certify active Neighbor
+Discovery, Router Advertisement, DHCPv6, firewall policy or notebook completion.
+
+The workflow has scoped native gates for NS1-NS6 and these IPv6 packs. The 36
+remaining generic Python pairs are not certified by these gates. `test/` and `.github/workflows/` are
 validation support, not additional learner assignments.

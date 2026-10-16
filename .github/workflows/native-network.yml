@@ -27,6 +27,8 @@ jobs:
         run: python3 test/verify_foundations.py --proof output/network-foundations.json
       - name: Exercise addressing, system name lookup and prefix boundary labs
         run: python3 test/verify_naming.py --proof output/network-addressing.json
+      - name: Exercise real IPv6 endpoints and independent prefix analysis
+        run: python3 test/verify_ipv6.py --proof output/network-ipv6.json
       - name: Exercise bounded HTTP and TCP reachability diagnostics
         run: python3 test/verify_reachability.py --proof output/network-reachability.json
       - name: Exercise passive TCP and UDP listener inventories
