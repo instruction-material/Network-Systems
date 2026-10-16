@@ -157,7 +157,7 @@ def main():
                 invalid = work / (mode + "-invalid-case.json")
                 invalid.write_text('{"unknown": "setting"}\n')
                 for kind in ["invalid-case", "existing-output"]:
-                    target = work / (mode + "-" + kind + ".json")
+                    target = work / (mode + "-" + kind + "-report.json")
                     if kind == "existing-output":
                         target.write_text("retained original\n")
                     trace = retained / (mode + "-" + kind + ".syscalls.txt")
@@ -165,7 +165,11 @@ def main():
                                       sys.executable, root / "starter/main.py", "--report", target,
                                       *(["--case", invalid] if kind == "invalid-case" else [])], root / "starter")
                     assert result["exitCode"] == 2 and "socket(AF_INET" not in trace.read_text()
-                    assert target.read_text() == "retained original\n" if kind == "existing-output" else not target.exists()
+                    if kind == "existing-output":
+                        assert target.read_text() == "retained original\n"
+                    else:
+                        assert not target.exists()
+                        assert invalid.read_text() == '{"unknown": "setting"}\n'
                     refusals.append({"mode": mode, "kind": kind, "trace": trace.name, "result": result})
         assert not Path(temporary).exists()
         assert before == {mode: hashes(ROOT / pack) for mode, pack in PACKS.items()}
