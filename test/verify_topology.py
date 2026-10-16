@@ -105,13 +105,22 @@ def check_cleanup(data):
         assert all(len(row["ifname"].encode()) <= 15 for row in topology["addresses"])
 
 
-def check_flows(data, completed):
+def check_flows(data, completed, policy_complete=False, interrupted=False):
     rows = data["lab"]["observations"]
-    assert [row["stage"] for row in rows] == ["forwarding-off", "routed", "snat", "dnat",
-                                              "mapping-removed", "direct-after-removal"]
+    exposure = data["lab"]["exposurePolicyRequested"]
+    stages = ["forwarding-off", "routed", "snat", "dnat", "mapping-removed", "direct-after-removal"]
+    if exposure:
+        stages += ["policy-baseline-direct", "policy-baseline-mapped"]
+        if not interrupted:
+            stages += ["policy-mapped-allowed", "policy-direct-blocked", "policy-direct-restored"]
+    assert [row["stage"] for row in rows] == stages
     expected_peers = [None, "10.10.0.2", "10.20.0.1", "10.20.0.1", None, "10.20.0.1"]
+    if exposure:
+        expected_peers += ["10.20.0.1", "10.20.0.1"]
+        if not interrupted:
+            expected_peers += ["10.20.0.1", None if policy_complete else "10.20.0.1", "10.20.0.1"]
     if not completed:
-        expected_peers = [None] * 6
+        expected_peers = [None] * len(stages)
     for row, peer in zip(rows, expected_peers):
         response = row["response"]
         assert row["forwarding"] == ("1" if completed and row["stage"] != "forwarding-off" else "0")
@@ -129,7 +138,35 @@ def check_flows(data, completed):
         assert "-j SNAT" in rows[4]["natRules"]
     else:
         assert all("-j SNAT" not in row["natRules"] and "-j DNAT" not in row["natRules"] for row in rows)
-    assert data["lab"]["complete"] is completed
+    assert data["lab"]["baseComplete"] is completed
+    if exposure:
+        if policy_complete:
+            assert re.search(r"^:FORWARD DROP \[\d+:\d+\]$", data["lab"]["policyBeforeInterruption"], re.MULTILINE)
+            for fragment in ("--ctstate NEW", "--ctorigdst 10.10.0.1", "--ctorigdstport 18080", "--ctdir ORIGINAL"):
+                assert fragment in data["lab"]["policyBeforeInterruption"]
+        if not interrupted:
+            current = rows[9]["filterRules"]
+            policy = re.search(r"^:FORWARD (\S+) \[(\d+):\d+\]$", current, re.MULTILINE)
+            assert policy
+            accepts = [(int(count), rule) for count, rule in re.findall(r"^\[(\d+):\d+\] (-A FORWARD .*)$", current, re.MULTILINE)
+                       if "-j ACCEPT" in rule]
+            new_count = sum(count for count, rule in accepts if "--ctstate NEW" in rule
+                            and "--ctorigdstport 18080" in rule)
+            reply_count = sum(count for count, rule in accepts if "ESTABLISHED" in rule)
+            assert data["lab"]["policyCounters"] == {
+                "policy": policy[1], "dropped": int(policy[2]) if policy[1] == "DROP" else 0,
+                "newMappedAccepted": new_count, "establishedAccepted": reply_count,
+            }
+            if policy_complete:
+                assert policy[1] == "DROP" and int(policy[2]) > 0 and new_count > 0 and reply_count > 0
+            else:
+                assert policy[1] == "ACCEPT" and new_count == reply_count == 0
+            assert re.search(r"^:FORWARD ACCEPT \[\d+:\d+\]$", rows[10]["filterRules"], re.MULTILINE)
+            assert "-A FORWARD" not in rows[10]["filterRules"]
+            if completed:
+                assert all("-j SNAT" in row["natRules"] and "-j DNAT" in row["natRules"] for row in rows[6:])
+    expected_completion = completed and (not exposure or policy_complete) and not interrupted
+    assert data["lab"]["complete"] is expected_completion
 
 
 def verify(root, proof, source_only):
@@ -169,20 +206,36 @@ def verify(root, proof, source_only):
         assert sys.platform == "linux" and os.geteuid() == 0
         host_before = host_state(records)
         with tempfile.TemporaryDirectory(prefix="ns6-native-check-") as temp:
-            for profile, source_role, completed, mode in (
-                    ("untouched-starter", "starter", False, "normal"),
-                    ("completed-starter", "starter", True, "normal"),
-                    ("reference", "solution", True, "normal"),
-                    ("intentional-failure", "solution", True, "failure"),
-                    ("cancel-live-worker", "solution", True, "cancellation")):
+            for profile, source_role, completed, policy, exposure, mode in (
+                    ("untouched-starter", "starter", False, False, False, "normal"),
+                    ("completed-starter", "starter", True, False, False, "normal"),
+                    ("reference", "solution", True, False, False, "normal"),
+                    ("intentional-failure", "solution", True, False, False, "failure"),
+                    ("cancel-live-worker", "solution", True, False, False, "cancellation"),
+                    ("policy-untouched-starter", "starter", False, False, True, "normal"),
+                    ("policy-completed-starter", "starter", True, True, True, "normal"),
+                    ("policy-reference", "solution", True, True, True, "normal"),
+                    ("policy-incomplete-starter", "starter", True, False, True, "normal"),
+                    ("policy-intentional-failure", "solution", True, True, True, "failure"),
+                    ("policy-cancel-live-worker", "solution", True, True, True, "cancellation")):
                 work = Path(temp) / profile
                 shutil.copytree(pack / source_role, work)
-                if profile == "completed-starter":
-                    # Only the three exercise cases differ; keep the starter apparatus.
+                if profile in ("completed-starter", "policy-completed-starter"):
+                    # Only exercise cases differ; keep the starter apparatus.
                     shutil.copyfile(pack / "solution/lab-rules.sh", work / "lab-rules.sh")
+                elif profile == "policy-incomplete-starter":
+                    starter = (work / "lab-rules.sh").read_text()
+                    reference = (pack / "solution/lab-rules.sh").read_text()
+                    for stage in ("forwarding", "snat", "dnat"):
+                        pattern = re.compile(r"^  " + stage + r"\)\n.*?^    ;;", re.MULTILINE | re.DOTALL)
+                        replacement = pattern.search(reference).group()
+                        starter = pattern.sub(lambda _match, value=replacement: value, starter)
+                    (work / "lab-rules.sh").write_text(starter)
                 output, ready = work / "observations.json", work / "ready.txt"
                 args = ["bash", str(work / "create_nat_lab.sh"), "--output", str(output),
                         "--test-mode", mode, "--ready-file", str(ready)]
+                if exposure:
+                    args.append("--exposure-policy")
                 code, stdout, stderr = run(args, records, ready if mode == "cancellation" else None)
                 data = json.loads(output.read_text())
                 result["runs"].append({"profile": profile, "exitCode": code,
@@ -191,10 +244,12 @@ def verify(root, proof, source_only):
                 assert host_state(records) == host_before
                 if mode == "normal":
                     assert code == 0, (stdout, stderr)
-                    check_flows(data, completed)
+                    check_flows(data, completed, policy)
                 else:
                     assert code != 0 and "error" in data["lab"]
                     assert not data["lab"]["complete"]
+                    if exposure:
+                        check_flows(data, completed, policy, interrupted=True)
         # Direct internal entry must refuse the host before any mounting or changes.
         code, _, stderr = run([sys.executable, str(pack / "solution/lab_runtime.py"),
                                "--inside", os.readlink("/proc/self/ns/net")], records)

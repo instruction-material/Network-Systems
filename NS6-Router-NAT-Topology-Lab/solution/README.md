@@ -66,7 +66,7 @@ It creates the apparatus and records blocked requests, then reports `Incomplete
 starter`. A successful apparatus run does not mean the exercises are complete.
 An isolation, command or cleanup error instead stops with a nonzero exit status.
 
-Edit only the three cases in `lab-rules.sh`. The apparatus passes the current
+For Unit7, edit the first three cases in `lab-rules.sh`. The apparatus passes the current
 owned router namespace as `$router`. Prefix every kernel command with
 `ip netns exec "$router"` so it runs in that namespace.
 
@@ -116,8 +116,9 @@ the last two requests.
 The DNAT request also matches the earlier SNAT rule after destination translation.
 That explains its observed peer address. Removing DNAT does not remove routes,
 forwarding or SNAT. The final direct request distinguishes removal of one mapping
-from loss of the entire network. No filtering policy is installed here: this is a
-translation and reachability experiment, not proof of a firewall or access policy.
+from loss of the entire network. The default six-stage run installs no filtering
+policy. Complete the additional Unit12 procedure below to measure an actual
+restrictive forwarding policy.
 
 ## Cleanup and troubleshooting
 
@@ -139,14 +140,90 @@ the first differing stage with its forwarding value and rule output. A timeout
 alone does not identify a route or NAT defect; use the successful server-local
 readiness probe and later observations as additional evidence.
 
-## Required evidence and extension
+## Unit7 evidence
 
 Keep your edited rules, predictions and actual JSON report. Explain the two
 default gateways, the difference between routing and forwarding, the exact peer
 address change caused by SNAT, and why the forwarded port stops working while
 the direct request still succeeds. Identify the limit of each conclusion.
 
-An optional extension is to design a restrictive forwarding policy on paper:
-which direction and TCP port should it allow, and what return traffic would need
-to pass? State the additional kernel rules and measurements needed to test that
-policy. Do not describe it as an implemented firewall experiment.
+## Unit12: restrict exposure and verify the boundary
+
+Continue the same saved project and notebook. This is the Secure Exposure
+capstone pass, not a second router setup project. The Unit7 apparatus and three
+completed routing/translation cases remain useful. The fourth `filter` case is
+required for this pass. Do not replace a working attempt with the reference.
+
+The policy permits new client requests to the published router endpoint
+`10.10.0.1:18080`, translated to the server at `10.20.0.2:8080`. It drops other
+new forwarded requests, including a fresh request directly to that same server
+service. Established and related forwarded traffic remains allowed. This is an
+IPv4 FORWARD policy inside the disposable router; it does not filter the router's
+own INPUT or OUTPUT traffic or revoke an already established connection.
+
+Before editing, predict why a rule allowing all traffic to server port 8080 would
+fail to enforce this policy. Both the direct request and a DNAT request have the
+same destination by the time they reach FORWARD. Connection tracking retains
+the original destination and port before translation, so those fields distinguish
+the published endpoint from a bypass of the mapping.
+
+The option definitions are in the
+[Netfilter conntrack reference](https://ipset.netfilter.org/iptables-extensions.man.html).
+The explanations and commands below supply the information needed for this lab.
+
+In the `filter` case, prefix each command with `ip netns exec "$router"`:
+
+1. Set the FORWARD chain's default policy to DROP with
+   `iptables -P FORWARD DROP`. This affects only the owned router.
+2. Append an ACCEPT rule for `-m conntrack --ctstate ESTABLISHED,RELATED`.
+   This permits the rest of an accepted connection and its return packets.
+3. Append an ACCEPT rule for new client requests. Match `-i rl0 -o rr0`,
+   source `10.10.0.0/24`, translated destination `10.20.0.2/32`, and
+   `-p tcp --dport 8080`. Add `-m conntrack --ctstate NEW --ctdir ORIGINAL`,
+   `--ctorigdst 10.10.0.1` and `--ctorigdstport 18080`. Use `-A FORWARD` to
+   append each rule and `-j ACCEPT` for the target. Keep the general established
+   rule separate from this narrower rule for new connections.
+
+Run this pass from the extracted role folder:
+
+```sh
+sudo bash create_nat_lab.sh --exposure-policy --output exposure-observations.json
+python3 -m json.tool exposure-observations.json
+```
+
+The apparatus first runs the six routing/NAT stages, then restores the DNAT
+mapping and adds these five observations. Every row makes a fresh TCP connection
+and uses the same live, owned HTTP server. The run token identifies its responses.
+
+| Additional stage | Fresh client request | Expected completed behavior |
+| --- | --- | --- |
+| policy-baseline-direct | 10.20.0.2:8080 | succeeds before restriction |
+| policy-baseline-mapped | 10.10.0.1:18080 | succeeds before restriction |
+| policy-mapped-allowed | 10.10.0.1:18080 | succeeds while FORWARD defaults to DROP |
+| policy-direct-blocked | 10.20.0.2:8080 | fails under the restrictive policy |
+| policy-direct-restored | 10.20.0.2:8080 | succeeds after removing only the FORWARD filter |
+
+Inspect `filterRules`, `policyBeforeInterruption` and `policyCounters` in the
+report. They retain actual `iptables-save -c -t filter` output. The DROP policy
+counter must increase, the original-endpoint NEW rule must accept packets, and
+the ESTABLISHED rule must accept later/return packets. A timeout without these
+observations does not establish which device or rule blocked the request.
+
+The final stage flushes only the owned router's FORWARD rules and restores its
+ACCEPT policy. Routes, forwarding, DNAT, SNAT and the server stay in place.
+Successful direct access after this change distinguishes filtering from a dead
+service or broken route. The reference's complete report requires both the
+traffic results and nonzero kernel policy/rule counters. Completing the three
+Unit7 cases while leaving `filter` blank must still report `Incomplete starter`
+for this pass, even though the server is reachable.
+
+Record the before/after policy, counters, original and translated endpoints, and
+the fresh direct/mapped results in the notebook. Explain the rule that matches
+the first packet and the rule that admits replies. State why preexisting tracked
+connections, router-local services, IPv6, other clients and public Internet
+reachability need separate tests before making broader security claims.
+
+For an instructor walkthrough, pause at each baseline, after applying the policy,
+and after removal. Partners can alternate who predicts the rule match and who
+finds the corresponding kernel evidence. Keep the edited rules, both reports,
+reasoning and cleanup evidence together as completion evidence.

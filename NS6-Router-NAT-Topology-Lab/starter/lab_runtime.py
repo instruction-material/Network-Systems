@@ -73,6 +73,24 @@ def firewall_configuration(raw):
                      for line in raw.splitlines() if not line.startswith("#"))
 
 
+def forwarding_counters(raw):
+    result = {"policy": None, "dropped": 0, "newMappedAccepted": 0, "establishedAccepted": 0}
+    for line in raw.splitlines():
+        policy = re.fullmatch(r":FORWARD (\S+) \[(\d+):\d+\]", line)
+        if policy:
+            result["policy"] = policy[1]
+            result["dropped"] = int(policy[2]) if policy[1] == "DROP" else 0
+        rule = re.fullmatch(r"\[(\d+):\d+\] (-A FORWARD .*)", line)
+        if not rule or "-j ACCEPT" not in rule[2]:
+            continue
+        if ("--ctstate NEW" in rule[2] and "--ctorigdst 10.10.0.1" in rule[2]
+                and "--ctorigdstport 18080" in rule[2] and "--ctdir ORIGINAL" in rule[2]):
+            result["newMappedAccepted"] += int(rule[1])
+        if "--ctstate" in rule[2] and "ESTABLISHED" in rule[2]:
+            result["establishedAccepted"] += int(rule[1])
+    return result
+
+
 def snapshot(records):
     firewall = command(["iptables-save"], records)["stdout"]
     return {"networkNamespace": os.readlink("/proc/self/ns/net"),
@@ -107,6 +125,7 @@ def serve(token):
 def inside(args):
     records, owned, worker = [], [], None
     result = {"commands": records, "observations": [], "complete": False,
+              "exposurePolicyRequested": args.exposure_policy,
               "cleanup": {"workerReaped": False, "namespacesRemoved": False}}
     current = os.readlink("/proc/self/ns/net")
     if current in (args.inside, os.readlink("/proc/1/ns/net")):
@@ -134,12 +153,22 @@ def inside(args):
                "response": probe(client, host, port),
                "forwarding": run("ip", "netns", "exec", router, "sysctl", "-n",
                                  "net.ipv4.ip_forward")["stdout"].strip(),
-               "natRules": run("ip", "netns", "exec", router, "iptables-save", "-t", "nat")["stdout"]}
+               "natRules": run("ip", "netns", "exec", router, "iptables-save", "-t", "nat")["stdout"],
+               "filterRules": run("ip", "netns", "exec", router, "iptables-save", "-c", "-t", "filter")["stdout"]}
         result["observations"].append(row)
         return row["response"]["body"]
 
     def apply(stage):
         run("bash", str(Path(__file__).with_name("lab-rules.sh")), stage, router)
+
+    def interruption_point():
+        if args.ready_file:
+            Path(args.ready_file).write_text("setup and service ready\n")
+        if args.test_mode == "failure":
+            raise RuntimeError("intentional failure after owned topology setup")
+        if args.test_mode == "cancellation":
+            signal.pause()
+            raise RuntimeError("unexpected wakeup")
 
     try:
         # Mount propagation and the named-netns registry belong to this run only.
@@ -185,13 +214,8 @@ def inside(args):
             time.sleep(0.1)
         else:
             raise RuntimeError("owned HTTP service readiness deadline exceeded")
-        if args.ready_file:
-            Path(args.ready_file).write_text("setup and service ready\n")
-        if args.test_mode == "failure":
-            raise RuntimeError("intentional failure after owned topology setup")
-        if args.test_mode == "cancellation":
-            signal.pause()
-            raise RuntimeError("unexpected wakeup")
+        if not args.exposure_policy:
+            interruption_point()
         blocked = observe("forwarding-off")
         apply("forwarding")
         routed = observe("routed")
@@ -205,12 +229,42 @@ def inside(args):
         def expected(body, peer):
             return body == {"token": args.token, "peer": peer,
                             "server": "10.20.0.2", "port": 8080, "path": "/lab"}
-        result["complete"] = (blocked is None and expected(routed, "10.10.0.2")
+        result["baseComplete"] = (blocked is None and expected(routed, "10.10.0.2")
                               and expected(translated, "10.20.0.1")
                               and expected(mapped, "10.20.0.1") and removed is None
                               and expected(direct, "10.20.0.1"))
+        result["complete"] = result["baseComplete"]
+        if args.exposure_policy:
+            # Unit12 extends the same attempt. Prove a working direct path before
+            # restricting it, then restore that path to distinguish a policy drop
+            # from a dead service, lost route, or absent NAT mapping.
+            result["complete"] = False
+            apply("dnat")
+            baseline_direct = observe("policy-baseline-direct")
+            baseline_mapped = observe("policy-baseline-mapped", "10.10.0.1", 18080)
+            apply("filter")
+            result["policyBeforeInterruption"] = run(
+                "ip", "netns", "exec", router, "iptables-save", "-c", "-t", "filter")["stdout"]
+            interruption_point()
+            policy_mapped = observe("policy-mapped-allowed", "10.10.0.1", 18080)
+            policy_direct = observe("policy-direct-blocked")
+            counters = forwarding_counters(result["observations"][-1]["filterRules"])
+            result["policyCounters"] = counters
+            # Remove only the owned router's filter, keeping routes and NAT.
+            run("ip", "netns", "exec", router, "iptables", "-F", "FORWARD")
+            run("ip", "netns", "exec", router, "iptables", "-P", "FORWARD", "ACCEPT")
+            restored = observe("policy-direct-restored")
+            result["complete"] = (result["baseComplete"]
+                                  and expected(baseline_direct, "10.20.0.1")
+                                  and expected(baseline_mapped, "10.20.0.1")
+                                  and expected(policy_mapped, "10.20.0.1")
+                                  and policy_direct is None and expected(restored, "10.20.0.1")
+                                  and counters["policy"] == "DROP" and counters["dropped"] > 0
+                                  and counters["newMappedAccepted"] > 0
+                                  and counters["establishedAccepted"] > 0)
     except (RuntimeError, LabInterrupted, subprocess.TimeoutExpired, AssertionError) as error:
         result["error"] = str(error)
+        result["complete"] = False
     finally:
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
         signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -249,6 +303,8 @@ def outside(args):
                  "--test-mode", args.test_mode]
         if args.ready_file:
             parts.extend(["--ready-file", args.ready_file])
+        if args.exposure_policy:
+            parts.append("--exposure-policy")
         try:
             result["isolatedProcess"] = command(parts, records, check=False, timeout=60)
         except (LabInterrupted, subprocess.TimeoutExpired) as error:
@@ -277,6 +333,8 @@ def outside(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="network-observations.json")
+    parser.add_argument("--exposure-policy", action="store_true",
+                        help="Extend the routing lab with Unit12's restrictive forwarding policy.")
     parser.add_argument("--inside", help=argparse.SUPPRESS)
     parser.add_argument("--original-mount", help=argparse.SUPPRESS)
     parser.add_argument("--token", help=argparse.SUPPRESS)
