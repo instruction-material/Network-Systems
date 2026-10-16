@@ -3,8 +3,8 @@
 This optional Network Stack extension follows the required transport project.
 The required project compares stream and datagram observations. This extension
 investigates a diagnostic that changes the receive queue it is trying to
-inspect. The goal is to preserve complete application datagrams while still
-observing the prefix of the next queued datagram.
+inspect. Preserve complete application datagrams while observing the prefix
+of the next queued datagram.
 
 The deliverable is a case configuration, a queue-state explanation, and an
 evidence notebook. The prewritten apparatus runs unchanged. Programming is
