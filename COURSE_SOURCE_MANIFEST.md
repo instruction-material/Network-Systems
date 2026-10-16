@@ -111,3 +111,16 @@ validation support, not additional learner assignments.
 Three application-protocol packs supply actual HTTP requests/responses, independent conditional-request and response-policy tasks, exact binary bytes, an owned held-port refusal and complete source guides. Their ordinary-user native gate retains raw wire bytes, curl corroboration, process identity and cleanup. Supplied DNS/TLS/SSH cases are constructed; notebook completion is not inferred.
 
 Three Unit3 observation packs now distinguish a real Linux bridge, routed gateway/return paths, SNAT and destination/port mapping in owned network/mount namespaces. Complete guides keep this introductory observation purpose distinct from later NS6 command editing and Unit12 policy work. Native acceptance retains actual MAC/FDB, routes, raw HTTP, endpoint views, host comparisons and cleanup; it does not infer notebook completion or Internet reachability.
+
+## Routed operations capstone
+
+`NS-03-network-systems-lab-17` replaces the generic port-string normalizer with
+an owned Linux dual-stack client/router/server fixture. The starter has two
+configuration faults; the reference and an independent completed attempt must
+pass the actual DNS, route, proxy, policy, packet and cleanup contracts.
+The separate `native-capstone` CI job retains four completed profiles, the two
+unfinished profiles, a route-only intermediate correction, three controlled
+regressions and a live interruption/isolation check. All prior native cohorts
+remain required. `network-notes.md` and `edge-cases.md` need actual observations;
+code success does not establish their completion. Source/native acceptance and
+site import integration are separate gates.

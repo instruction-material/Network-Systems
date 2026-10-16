@@ -1,0 +1,4 @@
+{
+  "ipv4_service_route": "198.18.99.0/30",
+  "proxy_upstream_port": 9001
+}
