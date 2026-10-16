@@ -24,7 +24,31 @@ def rows(raw, owned):
             if re.search(r"\bino:" + re.escape(inode) + r"\b", line)]
 
 
+def completed_syscalls(raw):
+    """Join only matching PID/syscall pairs split by strace interleaving."""
+    pending = {}
+    completed = []
+    for line in raw.splitlines():
+        resumed = re.match(r"^(\d+)\s+<\.\.\. (\w+) resumed>(.*)$", line)
+        if resumed:
+            pid, name, tail = resumed.groups()
+            assert pid in pending, (pid, name, "missing syscall start")
+            old_name, start = pending.pop(pid)
+            assert old_name == name, (pid, old_name, name)
+            completed.append(start + tail)
+        elif "<unfinished ...>" in line:
+            start = re.match(r"^(\d+)\s+(\w+)\(", line)
+            assert start is not None, line
+            pid, name = start.groups()
+            assert pid not in pending, (pid, "overlapping syscall starts")
+            pending[pid] = (name, line.split("<unfinished ...>", 1)[0])
+        else:
+            completed.append(line)
+    return "\n".join(completed)
+
+
 def reconcile(mode, report, trace):
+    trace = completed_syscalls(trace)
     observed = report["observations"]
     token = report["config"]["token"].encode()
     assert report["process"]["ownedSocketsClosed"]
@@ -84,11 +108,18 @@ def execute(args, cwd, stdout_path, stderr_path):
         stdout, stderr = process.communicate(timeout=45)
     except BaseException:
         try:
-            os.killpg(process.pid, signal.SIGKILL)
+            os.killpg(process.pid, signal.SIGTERM)
         except ProcessLookupError:
             pass
-        stdout, stderr = process.communicate()
-        cleanup = "owned process group killed and reaped"
+        try:
+            stdout, stderr = process.communicate(timeout=3)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            stdout, stderr = process.communicate()
+        cleanup = "owned process group terminated and reaped"
         raise
     finally:
         record = {"parentTask": "network-optional-listener-native-ci",
