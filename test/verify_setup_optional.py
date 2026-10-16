@@ -216,6 +216,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--proof", type=Path, required=True)
     args = parser.parse_args()
+    args.proof = args.proof.resolve()
     assert sys.platform == "linux" and os.getuid() != 0 and shutil.which("strace")
     args.proof.parent.mkdir(parents=True, exist_ok=True)
     retained = args.proof.parent / "setup-observations"
