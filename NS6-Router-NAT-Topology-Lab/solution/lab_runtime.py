@@ -20,10 +20,14 @@ def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+class LabInterrupted(Exception):
+    """A cancellation that selector I/O must not mistake for a retryable EINTR."""
+
+
 def interrupted(_number, _frame):
     signal.signal(signal.SIGTERM, signal.SIG_IGN)
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-    raise InterruptedError("lab interrupted; cleaning up owned resources")
+    raise LabInterrupted("lab interrupted; cleaning up owned resources")
 
 
 def stop(process):
@@ -205,7 +209,7 @@ def inside(args):
                               and expected(translated, "10.20.0.1")
                               and expected(mapped, "10.20.0.1") and removed is None
                               and expected(direct, "10.20.0.1"))
-    except (RuntimeError, InterruptedError, subprocess.TimeoutExpired, AssertionError) as error:
+    except (RuntimeError, LabInterrupted, subprocess.TimeoutExpired, AssertionError) as error:
         result["error"] = str(error)
     finally:
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
@@ -247,7 +251,7 @@ def outside(args):
             parts.extend(["--ready-file", args.ready_file])
         try:
             result["isolatedProcess"] = command(parts, records, check=False, timeout=60)
-        except (InterruptedError, subprocess.TimeoutExpired) as error:
+        except (LabInterrupted, subprocess.TimeoutExpired) as error:
             result["error"] = str(error)
         finally:
             signal.signal(signal.SIGTERM, signal.SIG_IGN)
