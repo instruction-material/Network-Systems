@@ -15,13 +15,13 @@ to inspect this account's available view. Process details for other accounts
 can be hidden. Record the issuing machine, account, time and network namespace;
 containers or separate namespaces can have different socket tables.
 
-Review the selected starter, save it and download the ZIP from the integrated
-workspace. Extract it and enter `starter/` in the external Linux terminal.
+Review the selected role, save it and download the ZIP from the integrated
+workspace. Extract it and enter the selected role folder in the external Linux terminal:
+`starter/` for the learner attempt or `solution/` for the reference.
 Keep `network-notes.md` beside the script. The browser edits and saves these
 files; the actual kernel inventory runs on Linux. Preserve each report under
 a fresh name. The script writes to standard output and never opens or
-overwrites a report file itself. A former output-file argument is now replaced
-by the optional numeric port filter shown in the usage line.
+overwrites a report file itself. The optional numeric port filter is shown in the usage line.
 
 ## Predict and collect the socket evidence
 

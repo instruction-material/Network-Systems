@@ -12,8 +12,9 @@ question, not proof that a service or machine is IPv4-only.
 
 Use an owned Linux practice environment with Bash, GNU coreutils (`timeout`),
 BIND's `dig` and libc's `getent`. Running the supplied comparison requires an
-ordinary account. Review and save the selected starter, download its ZIP and
-enter `starter/` in the external Linux terminal. The browser saves the scripts
+ordinary account. Review and save the selected role, download its ZIP and
+enter the selected role folder (`starter/` for the learner attempt or
+`solution/` for the reference) in the external Linux terminal. The browser saves the scripts
 and `network-notes.md`; the actual system commands execute on Linux. Keep each
 comparison under a fresh report name. The reference belongs to a separate
 workspace and does not replace the learner attempt.
