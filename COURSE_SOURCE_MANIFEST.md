@@ -151,3 +151,7 @@ The targeted native scope verifies actual role commands against independently
 decoded DNS wire bytes, one-field completions, a wrong-name control, invalid
 inputs, preserved report files and a confirmed live-child interruption.
 Source qualification and site import/export acceptance remain separate.
+
+## Optional UFW source review, November 15, 2026
+
+The two Unit 9 optional projects replace the generic port parser with distinct management-port transfer and application-profile exposure tasks. Both retain the qualified NS3 runtime, launcher and namespace guards. The starter changes one policy value or one profile field; separate references, predictions, reports and recovery checks support independent practice. Source checks cover all 26 files. Native acceptance and site integration remain separate gates; these two projects are candidates pending those gates. Nineteen other generic optional source families remain unrepaired, alongside these two UFW candidates and the two separately qualified DNS pairs.

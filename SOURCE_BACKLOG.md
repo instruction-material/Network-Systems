@@ -16,3 +16,7 @@ correction. Two optional DNS families now contain actual DNS-query/configuration
 projects and complete guides; their current native qualification is separate
 from the 27 previously qualified source families and from site integration.
 File presence alone does not establish source correctness.
+
+## Optional UFW source review, November 15, 2026
+
+The two Unit 9 optional projects replace the generic port parser with distinct management-port transfer and application-profile exposure tasks. Both retain the qualified NS3 runtime, launcher and namespace guards. The starter changes one policy value or one profile field; separate references, predictions, reports and recovery checks support independent practice. Source checks cover all 26 files. Native acceptance and site integration remain separate gates; these two projects are candidates pending those gates. Nineteen other generic optional source families remain unrepaired, alongside these two UFW candidates and the two separately qualified DNS pairs.
