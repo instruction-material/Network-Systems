@@ -33,10 +33,12 @@ def check_observations(data, kind, corrected, mode):
     if mode != "normal":
         assert lab.get("error") and lab["complete"] is False
         if mode == "cancellation":
-            assert "signal" in lab["error"]
+            assert lab["error"] == data.get("error") == "lab interrupted; cleaning up owned resources"
             check_flows(data, True, policy_complete=True, interrupted=True)
             assert [r["stage"] for r in rows] == BASE_STAGES + POLICY_STAGES[:2]
             assert re.search(r"^:FORWARD DROP \[\d+:\d+\]$", lab["policyBeforeInterruption"], re.M)
+        else:
+            assert lab["error"] == "intentional failure after owned topology setup"
         return
     assert "error" not in lab and "error" not in data
     stages = BASE_STAGES + (POLICY_STAGES if exposure else [])
