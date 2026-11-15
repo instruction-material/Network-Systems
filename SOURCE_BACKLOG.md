@@ -11,7 +11,7 @@ Every learner project folder is linked from the catalog. The validation director
 - `test/` holds native acceptance tooling for introductory, addressing/naming, isolated router/NAT, owned HTTP capture and isolated UFW policy, IPv6 and application-protocol projects.
 - `.github/workflows/` runs that tooling in disposable Linux CI.
 
-These are support directories. Eight active generic Python pairs still require content correction. Forty-two source families have scoped native qualification, including the six routing/capture pairs now accepted and source-released on both site variants. File presence alone does not establish source correctness.
+These are support directories. Six active generic Python pairs still require content correction. Forty-four source families have scoped native qualification, including the six routing/capture pairs now accepted and source-released on both site variants. File presence alone does not establish source correctness.
 
 ## Optional UFW source review, November 15, 2026
 
@@ -35,3 +35,5 @@ optional pairs retain their accepted original and site workflow evidence.
 ## Optional capstone identity and prefix correction
 
 The two capstone optional pairs now supply route-prefix coverage and wrong-responding-backend investigations. The core and optional fixtures distinguish the owned denial-control application and require the intended loopback backend. The recorded old-source Linux counterexample used actual syscall destinations and reproduced false completion at port 8088; the corrected source requires separate current native and actual site acceptance. Six other generic source pairs remain unrepaired. No new acceptance or source release is inferred from this candidate.
+
+Targeted capstone qualification passed at efde30862ec77ba94f9c2ad3857a819fd902c23c in [run 43762738707](https://github.com/instruction-material/Network-Systems/actions/runs/43762738707). Both requested jobs passed: eleven core profiles, fourteen optional profiles and four actual syscall-traced identity profiles. Twenty-seven populated captures were independently decoded; two pre-probe live-interruption captures contain only valid PCAP headers and are separate cleanup observations. The wrong control identity and a copied success body with the wrong endpoint both remain incomplete. Actual site import/export acceptance and the full source matrix remain separate pending gates.
