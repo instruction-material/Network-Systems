@@ -11,7 +11,7 @@ Every learner project folder is linked from the catalog. The validation director
 - `test/` holds native acceptance tooling for introductory, addressing/naming, isolated router/NAT, owned HTTP capture and isolated UFW policy, IPv6 and application-protocol projects.
 - `.github/workflows/` runs that tooling in disposable Linux CI.
 
-These are support directories. Thirteen active generic Python pairs still require content correction. Thirty-seven source families have scoped native qualification, including the six routing/capture pairs now accepted and source-released on both site variants. File presence alone does not establish source correctness.
+These are support directories. Eight active generic Python pairs still require content correction. Forty-two source families have scoped native qualification, including the six routing/capture pairs now accepted and source-released on both site variants. File presence alone does not establish source correctness.
 
 ## Optional UFW source review, November 15, 2026
 
@@ -21,14 +21,13 @@ The two Unit 9 optional projects replace the generic port parser with distinct m
 
 Six standalone starter/reference pairs now use the qualified NS6 and NS5 apparatus with distinct one-line choices: SNAT source matching, DNAT destination ports, direct-path exposure, translated-port policy, insufficient capture length and capture selection. Guides and notebooks support an independent attempt and paced review. All 66 original files are source-checked. Native qualification passed at source 033893724fbae7a81100cad24a4c7386b8fef6d7: [routing, 14 profiles](https://github.com/instruction-material/Network-Systems/actions/runs/43746525763) and the independently successful [capture job, 11 profiles](https://github.com/instruction-material/Network-Systems/actions/runs/43745059230). The capture run as a whole failed its separate routing checker; its capture inputs are byte-identical to the current source. Earlier checker failures remain recorded. Actual site import/export acceptance passed in [run 43748597007](https://github.com/anderson-webops/classes.jacobdanderson.net/actions/runs/43748597007): 24 browser profiles, 48 exports and 37 native profiles, including twelve exports containing actual browser-made task edits. Both site variants delivered the six projects in immutable releases [v2.8.195](https://github.com/anderson-webops/classes.jacobdanderson.net/releases/tag/v2.8.195) and [v2.8.135](https://github.com/instruction-material/classes.jacobdanderson.net/releases/tag/v2.8.135). The complete original-source run [43749117311](https://github.com/instruction-material/Network-Systems/actions/runs/43749117311) passed all nine jobs. Four earlier DNS/UFW pairs are qualified and delivered. Thirteen generic optional pairs remain unrepaired. Code execution does not establish notebook completion.
 
-## Five diagnostics candidates, November 15, 2026
+## Five diagnostics source qualification, November 15, 2026
 
 The two Unit 6 optional investigations and three archived Diagnostic Workflow
 Studio packs now contain distinct owned loopback address, port, protocol,
 response-deadline and HTTP-status tasks. Each has complete independent/guided
 instructions and a separate starter/reference configuration. The bounded NS2
 collector retains its qualified behavior with one numeric-netcat flag added to
-keep the supplied literal endpoints independent of name lookups. The new owned
-fixture still requires native and actual site import/export qualification.
-Eight generic source pairs remain beyond these five candidates. The ten earlier
+keep the supplied literal endpoints independent of name lookups. The new owned fixture passed [35 native profiles and three input/report preservation refusals](https://github.com/instruction-material/Network-Systems/actions/runs/43753829323), including 30 ordinary role/correction profiles, the layered studio continuation, a pre-probe failure and a confirmed live-worker interruption. Actual site import/export acceptance remains pending.
+Eight generic source pairs remain unrepaired. The ten earlier
 optional pairs retain their accepted original and site workflow evidence.
