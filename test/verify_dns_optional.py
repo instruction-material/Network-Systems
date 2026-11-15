@@ -109,6 +109,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--proof", type=Path, required=True)
     args = parser.parse_args()
+    args.proof = args.proof.resolve()
     output = args.proof.parent / "dns-optional-raw"
     output.mkdir(parents=True, exist_ok=False)
     proof = {"at": stamp(), "accepted": False, "profiles": [], "processes": [],
