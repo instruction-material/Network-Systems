@@ -172,5 +172,40 @@
       ],
       "taskFile": "case.json"
     }
+  ],
+  "continuationCases": [
+    {
+      "profile": "studio-compound-fault",
+      "case": {
+        "targetAddress": "reserved",
+        "targetPort": "owned",
+        "scheme": "https",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "complete": false
+    },
+    {
+      "profile": "studio-address-only-correction",
+      "case": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "https",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "complete": false
+    },
+    {
+      "profile": "studio-recovered",
+      "case": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "complete": true
+    }
   ]
 }

@@ -92,6 +92,37 @@ comparison pattern; it cannot supply the token, ports, statuses and reasoning
 from an independent run. No output here measures a second-machine path,
 privileged firewall policy, Internet routing or a completed notebook.
 
+## Studio continuation: distinguish two faults in sequence
+
+This continuation follows the Diagnostic Workflow Studio address investigation
+in the same saved attempt. Use the same ordinary-account Linux setup and the
+five files described above. First complete the single-field address diagnosis.
+Preserve those reports before investigating the following new case.
+
+1. In a copy of the corrected case, set targetAddress to reserved and scheme to
+   https. Keep targetPort owned, responseMode http and httpStatus 200.
+   Run `python3 main.py --report compound-fault.json`.
+2. Correct only targetAddress to owned. Run
+   `python3 main.py --report address-only-correction.json`.
+3. Correct only scheme to http. Run
+   `python3 main.py --report full-recovery.json`.
+4. Compare the seven statuses and exact selected endpoints at all three stages.
+   State which observation became possible after the first correction and why
+   it was unjustified to claim a healthy application immediately after that
+   correction. Repeat the final state with --alternate and a fresh report.
+
+Self-check after an independent prediction: the first target refuses TCP at the
+reserved address, while the loopback HTTPS observation separately shows the
+protocol mismatch. Correcting the target address restores TCP but leaves the TLS
+failure. Correcting the scheme then yields the owned HTTP 200 token and
+complete=true. The independent plain-HTTP control remains healthy throughout.
+Keep each raw failure; identify the first failing gate for each selected target
+instead of replacing earlier evidence with the final successful result.
+
+This is a continuation of the same studio configuration and notebook. In a
+guided walkthrough, pause before each single-field change and justify the next
+test from the current evidence.
+
 ## Independent record and guided pauses
 
 An independent record contains the prediction, exact failed evidence, first

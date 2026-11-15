@@ -112,7 +112,7 @@ def stable(raw, reference):
             "addresses": addresses, "routes": routes}
 
 
-def check_report(data, definition, corrected, mode="normal"):
+def check_report(data, definition, corrected, mode="normal", expected_case=None):
     assert data["startedAt"] <= data["endedAt"]
     assert data["hostUnchanged"] and data["hostBefore"] == data["hostAfter"]
     assert data["hostBefore"] == stable(data["rawHostBefore"], data["hostBefore"])
@@ -143,7 +143,7 @@ def check_report(data, definition, corrected, mode="normal"):
         assert "diagnostic" not in data
         return
     assert "error" not in data and "cleanupError" not in data
-    case = definition["referenceCase" if corrected else "starterCase"]
+    case = expected_case or definition["referenceCase" if corrected else "starterCase"]
     assert data["case"] == ready["case"] == worker["case"] == case
     target_host = ready["host"] if case["targetAddress"] == "owned" else ready["reservedAddress"]
     target_port = ready["servicePort"] if case["targetPort"] == "owned" else ready["reservedPort"]
@@ -160,13 +160,11 @@ def check_report(data, definition, corrected, mode="normal"):
     assert list(independent) == LABELS
     expected = dict.fromkeys(LABELS, 0)
     kind = definition["kind"]
-    if not corrected:
-        if kind in ["protocol", "deadline", "port"]:
-            expected[LABELS[4]] = expected[LABELS[5]] = {"protocol": 35, "deadline": 28, "port": 7}[kind]
-        elif kind == "address":
-            expected[LABELS[5]] = 7
-        if kind in ["port", "address"]:
-            expected[LABELS[6]] = 1
+    expected[LABELS[4]] = (7 if case["targetPort"] == "reserved" else 35 if case["scheme"] == "https"
+                           else 28 if case["responseMode"] == "silent" else 0)
+    expected[LABELS[5]] = (7 if case["targetAddress"] == "reserved" or case["targetPort"] == "reserved"
+                           else 35 if case["scheme"] == "https" else 28 if case["responseMode"] == "silent" else 0)
+    expected[LABELS[6]] = 1 if case["targetAddress"] == "reserved" or case["targetPort"] == "reserved" else 0
     assert independent == expected, (kind, corrected, independent)
     assert "not a second-machine test" in result["stdout"]
     assert "Target: " + case["scheme"] + "://" + target_host + ":" + str(target_port) + "/" in result["stdout"]
@@ -187,33 +185,35 @@ def check_report(data, definition, corrected, mode="normal"):
     assert data["targetTokenObserved"] == ("X-Owned-Diagnostics: " + ready["token"] in http)
     actual_complete = independent[LABELS[5]] == independent[LABELS[6]] == 0 and status == 200 and data["targetTokenObserved"]
     assert data["complete"] is actual_complete is corrected
-    expected_requests = 3 if corrected or kind in ["deadline", "status"] else 2 if kind == "address" else 1
+    # Two collector requests and one independent control are distinct events.
+    expected_requests = 1 + int(case["targetPort"] == "owned" and case["scheme"] == "http") + int(
+        case["targetPort"] == "owned" and case["targetAddress"] == "owned" and case["scheme"] == "http")
     assert len(worker["requests"]) == expected_requests, (kind, worker["requests"])
     for row in worker["requests"]:
         assert row["method"] == "HEAD" and row["path"] == "/" and row["peer"][0] == "127.0.0.1"
         assert base64.b64decode(row["requestLineBase64"], validate=True).startswith(b"HEAD / HTTP/1.1\r\n")
-    if kind == "protocol" and not corrected:
-        assert len(worker["protocolErrors"]) == 2
-        assert all(base64.b64decode(row["requestLineBase64"], validate=True).startswith(bytes([22]))
-                   and row["status"] == 400 for row in worker["protocolErrors"])
-    else:
-        assert not worker["protocolErrors"]
+    expected_protocol_errors = int(case["targetPort"] == "owned" and case["scheme"] == "https") + int(
+        case["targetPort"] == "owned" and case["targetAddress"] == "owned" and case["scheme"] == "https")
+    assert len(worker["protocolErrors"]) == expected_protocol_errors
+    assert all(base64.b64decode(row["requestLineBase64"], validate=True).startswith(bytes([22]))
+               and row["status"] == 400 for row in worker["protocolErrors"])
 
 
-def check_trace(text, data=None, no_network=False):
+def check_trace(text, data=None, no_network=False, collector_requests=True):
     assert text and ("exited with" in text or "killed by" in text)
     if no_network:
         assert 'socket(AF_INET' not in text and 'bind(' not in text and 'connect(' not in text
         return
     assert 'bind(' in text and 'listen(' in text and 'connect(' in text
     addresses = re.findall(r'connect\([^\n]*sin_addr=inet_addr\("([^"]+)"\)', text)
-    assert addresses and set(addresses) <= {"127.0.0.1", "127.0.0.2"}, addresses
+    assert set(addresses) <= {"127.0.0.1", "127.0.0.2"}, addresses
+    assert bool(addresses) is collector_requests, addresses
     assert 'sin_port=htons(53)' not in text
     if data:
         assert 'htons(' + str(data["ready"]["servicePort"]) + ')' in text
 
 
-def run_profile(folder, definition, corrected, alternate, mode, raw, processes, profile):
+def run_profile(folder, definition, corrected, alternate, mode, raw, processes, profile, expected_case=None):
     report_path = raw / (profile + ".json")
     trace_path = raw / (profile + ".syscalls.txt")
     ready = raw / (profile + ".ready.json") if mode == "hold" else None
@@ -227,10 +227,10 @@ def run_profile(folder, definition, corrected, alternate, mode, raw, processes, 
     result = command(argv, folder, processes, ready)
     assert result["exitCode"] == (0 if mode == "normal" else 2), result
     data = json.loads(report_path.read_text())
-    check_report(data, definition, corrected, mode)
-    check_trace(trace_path.read_text(), data)
+    check_report(data, definition, corrected, mode, expected_case)
+    check_trace(trace_path.read_text(), data, collector_requests=mode == "normal")
     return {"profile": profile, "pack": definition["pack"], "kind": definition["kind"],
-            "corrected": corrected, "alternate": alternate, "mode": mode, "result": result,
+            "corrected": corrected, "alternate": alternate, "mode": mode, "result": result, "expectedCase": expected_case,
             "report": report_path.name, "reportSHA256": digest(report_path.read_bytes()),
             "trace": trace_path.name, "traceSHA256": digest(trace_path.read_bytes()), "evidence": data}
 
@@ -264,6 +264,13 @@ def main():
                         profile = definition["kind"] + "-" + role + ("-alternate" if alternate else "-default")
                         proof["runs"].append(run_profile(folder, definition, role != "starter", alternate,
                                                          "normal", raw, proof["processes"], profile))
+            studio = next(d for d in CASES["definitions"] if d["kind"] == "address")
+            layered = temporary / "studio layered owned case"
+            shutil.copytree(ROOT / studio["pack"] / "starter", layered)
+            for stage in CASES["continuationCases"]:
+                (layered / "case.json").write_text(json.dumps(stage["case"], indent=2) + "\n")
+                proof["runs"].append(run_profile(layered, studio, stage["complete"], False, "normal",
+                    raw, proof["processes"], stage["profile"], stage["case"]))
             definition = CASES["definitions"][0]
             folder = ROOT / definition["pack"] / "solution"
             for mode in ["failure", "hold"]:
@@ -288,8 +295,8 @@ def main():
             check_trace(trace.read_text(), no_network=True)
             proof["refusals"].append({"kind": "preserved-report", "result": result, "trace": trace.name})
         assert proof["sourceFiles"] == source_checks(args.exported_source)
-        assert len(proof["runs"]) == 32 and len(proof["refusals"]) == 3
-        proof.update(accepted=True, actualProfiles=32, normalRoleProfiles=30, liveInterruptedWorkerVerified=True,
+        assert len(proof["runs"]) == 35 and len(proof["refusals"]) == 3
+        proof.update(accepted=True, actualProfiles=35, normalRoleProfiles=30, layeredStudioProfiles=3, liveInterruptedWorkerVerified=True,
                      allOwnedProcessesAndSocketsClosed=True, allFailedRawObservationsRetained=True,
                      allSourcesUnchanged=True, temporaryValidationTreeRemoved=not temporary.exists())
     finally:
