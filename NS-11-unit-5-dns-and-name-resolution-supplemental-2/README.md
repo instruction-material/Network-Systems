@@ -30,8 +30,6 @@ The JSON retains raw dig stdout/stderr, actual argv and child PID, command statu
 
 Run the untouched starter with the resolver alive. It reports goalMet=false and exits 78 after saving actual answers. Change question to alias.course.test and save a second report. Then compare dual.course.test, v4.course.test and missing.course.test in separately named reports. Only the alias meets this project's complete alias-and-two-types goal.
 
-For the stopped phase use the same command with `--phase stopped` and a new output filename after stopping the owned resolver. That phase belongs only to the extension project.
-
 ## Evidence and comparison
 
 Complete network-notes.md with context/tool versions, predictions, first observations, the one-field correction, all raw reports, a comparison and one unsupported inference. Read the reference case and its worked interpretation after the independent attempt. The reference needs the same real fixture; it does not invent a currently running resolver or fill a measured notebook.

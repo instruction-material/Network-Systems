@@ -15,6 +15,10 @@ import time
 
 NAMES = {"dual.course.test", "v4.course.test", "alias.course.test", "missing.course.test"}
 
+class CollectionInterrupted(RuntimeError):
+    """Propagate cancellation past selectors that retry InterruptedError."""
+
+
 def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -107,7 +111,7 @@ def main(project, case_path):
         if project == "alias-transfer" and args.phase != "live":
             raise ValueError("The alias investigation uses the live phase")
         def cancelled(signum, frame):
-            raise InterruptedError("DNS collection interrupted; any new report is incomplete")
+            raise CollectionInterrupted("DNS collection interrupted; any new report is incomplete")
         signal.signal(signal.SIGTERM, cancelled)
         case = json.loads(case_path.read_text())
         validate_case(project, case)
@@ -140,6 +144,6 @@ def main(project, case_path):
             destination.write("\n")
         print(json.dumps({"report": str(args.output), "goalMet": bool(goal)}))
         return 0 if goal else 78
-    except (ValueError, OSError, json.JSONDecodeError) as error:
+    except (ValueError, OSError, json.JSONDecodeError, CollectionInterrupted) as error:
         print(str(error), file=sys.stderr)
         return 2
