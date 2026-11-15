@@ -136,3 +136,18 @@ retains actual execve/chdir traces, twelve role/fixture profiles, a one-field
 correction, refusal cases and controlled regressions. All previous Linux and
 capstone cohorts remain required. Runtime success does not infer notebook
 completion; site import integration is a separate gate.
+
+## Optional DNS investigations
+
+The Unit 5 transfer and extension packs now exercise an owned loopback DNS
+resolver. The transfer follows CNAME plus typed A/AAAA answers and preserves an
+unsuccessful configured question before a one-field correction. The separate
+extension compares a real NXDOMAIN answer with a failed transport after the
+owned resolver stops. Each role includes complete guidance, runtime, case
+configuration and an independent evidence notebook. Python programming remains
+optional; the networking task is prediction, configuration and explanation.
+
+The targeted native scope verifies actual role commands against independently
+decoded DNS wire bytes, one-field completions, a wrong-name control, invalid
+inputs, preserved report files and a confirmed live-child interruption.
+Source qualification and site import/export acceptance remain separate.

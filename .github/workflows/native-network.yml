@@ -1,6 +1,13 @@
 name: Network Systems native source
 
 on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        type: choice
+        options: [dns-optional, full]
+        default: dns-optional
+        description: Native source scope
   pull_request:
     branches: [main]
   push:
@@ -11,6 +18,7 @@ permissions:
 
 jobs:
   native-linux:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -55,6 +63,7 @@ jobs:
           retention-days: 7
 
   native-capstone:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -79,6 +88,7 @@ jobs:
           retention-days: 7
 
   native-setup-optional:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -103,6 +113,7 @@ jobs:
           retention-days: 7
 
   native-transport-optional:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -127,6 +138,7 @@ jobs:
           retention-days: 7
 
   native-listener-optional:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -146,6 +158,30 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: network-listener-optional-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
+
+  native-dns-optional:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare ordinary-user DNS and process tracing tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 dnsutils dnsmasq-base strace
+      - name: Check DNS result boundaries and case validation
+        run: python3 test/test_dns_optional.py
+      - name: Verify actual role commands, decoded DNS packets and process cleanup
+        run: python3 test/verify_dns_optional.py --proof output/network-dns-optional.json
+      - name: Retain source, raw DNS wire data and lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-dns-optional-source
           path: output/
           if-no-files-found: error
           retention-days: 7

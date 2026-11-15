@@ -1,14 +1,47 @@
-# Unit 5: DNS and Name Resolution supplemental 2
+# DNS resolution transfer: follow the typed alias answers
 
-Course: Network Systems
-Module: Unit 5: DNS and Name Resolution supplemental 2
+Predict the A and AAAA results for all four supplied names. The configured question initially selects the IPv4-only DNS data. Change only case.json to select the alias that supplies both typed address answers. Keep the unsuccessful first report. Explain the CNAME owner, canonical target and final A/AAAA data; neither an AAAA answer nor a CNAME proves application reachability.
 
-Use the starter folder first. The starter is intentionally incomplete, and the solution shows one clean way to finish the same build after the student has worked through it.
+## Linux environment and owned resolver
 
-Suggested flow:
-- Read the module brief and identify the core requirement.
-- Complete the TODO markers in the starter implementation.
-- Test at least one custom case beyond the default example.
-- Compare against the solution only after the student has a working draft.
+Use an ordinary account in the selected Linux lab, with Python 3.10 or newer, dig and dnsmasq. In an Ubuntu lab that the account administers, package preparation is `sudo apt-get install python3 dnsutils dnsmasq-base`. The experiment itself runs without sudo.
 
-Quick run hint: `python3 main.py`
+In a dedicated terminal start this foreground fixture. It binds only loopback on an unprivileged port, reads no hosts/resolver configuration and forwards no queries. If port 1053 is occupied, select another unused port above 1024 in both this command and --port. Keep the actual port and process identity in the notebook.
+
+```sh
+dnsmasq --no-daemon --conf-file=/dev/null --no-hosts --no-resolv --log-queries --log-facility=- --listen-address=127.0.0.1 --bind-interfaces --port=1053 --local=/course.test/ --host-record=dual.course.test,127.0.0.8,::1 --host-record=v4.course.test,127.0.0.9 --cname=alias.course.test,dual.course.test
+```
+
+Keep this terminal visible. Ctrl-C stops this specific foreground fixture when the task requests it. It supplies DNS observations only. System NSS, service connection, actual IPv6 forwarding and an Internet DNS service are separate questions.
+
+## Files, prediction and first run
+
+Keep main.py, dns_probe.py, case.json, network-notes.md and README.md together. The program already performs the real queries. The required work is configuration and the evidence notebook; Python programming is optional.
+
+From the exported starter directory:
+
+```sh
+python3 main.py --port 1053 --phase live --output first-observation.json
+```
+
+The JSON retains raw dig stdout/stderr, actual argv and child PID, command status, DNS status, typed records, current UID and namespace. A no-data answer remains separate from NXDOMAIN, a DNS error response and a transport failure. Each child has a four-second deadline and is reaped. A report filename must be new; earlier reports are preserved. Exit 78 identifies an unmet configured goal, not an absent report.
+
+## Investigation
+
+Run the untouched starter with the resolver alive. It reports goalMet=false and exits 78 after saving actual answers. Change question to alias.course.test and save a second report. Then compare dual.course.test, v4.course.test and missing.course.test in separately named reports. Only the alias meets this project's complete alias-and-two-types goal.
+
+For the stopped phase use the same command with `--phase stopped` and a new output filename after stopping the owned resolver. That phase belongs only to the extension project.
+
+## Evidence and comparison
+
+Complete network-notes.md with context/tool versions, predictions, first observations, the one-field correction, all raw reports, a comparison and one unsupported inference. Read the reference case and its worked interpretation after the independent attempt. The reference needs the same real fixture; it does not invent a currently running resolver or fill a measured notebook.
+
+In a guided walkthrough, pause after predicting each answer, after observing the response status and after the changed case. Keep this optional project's saved attempt separate from the core DNS project and from the other optional investigation.
+
+## Fixed fixture answer key
+
+alias.course.test has CNAME dual.course.test plus A 127.0.0.8 or AAAA ::1 in the respective question. dual.course.test supplies the address data directly, so it does not meet the alias goal. v4.course.test supplies an A answer and a successful NOERROR response with no AAAA data. missing.course.test has NXDOMAIN. These are the owned fixture's configured DNS data, not measurements of an Internet service.
+
+The answer key describes this explicitly supplied fixture. Record fresh observed ports, PIDs, errors and DNS data before comparing them. A passing program does not supply the explanatory notebook.
+
+References: [dnsmasq options](https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html), [DNS message and record formats](https://www.rfc-editor.org/rfc/rfc1035.html).
