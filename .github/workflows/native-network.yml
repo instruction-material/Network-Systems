@@ -5,7 +5,7 @@ on:
     inputs:
       scope:
         type: choice
-        options: [diagnostics-five, dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
+        options: [proxy-identity, capstone-optional, diagnostics-five, dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
         default: dns-optional
         description: Native source scope
   pull_request:
@@ -304,3 +304,26 @@ jobs:
           path: output/
           if-no-files-found: error
           retention-days: 30
+
+  native-proxy-identity:
+    if: github.event_name == 'workflow_dispatch' && inputs.scope == 'proxy-identity'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare owned routed-capstone and syscall tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 iproute2 iptables util-linux curl dnsutils tcpdump dnsmasq-base strace
+      - name: Reproduce historical incorrect proxy-target acceptance
+        run: sudo python3 -B test/verify_capstone_proxy_identity.py --expect-wrong-accepted --proof output/proxy-identity.json
+      - name: Retain exact source, syscall, packet and cleanup evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-proxy-identity
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
