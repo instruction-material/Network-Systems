@@ -9,7 +9,7 @@ import sys
 import tempfile
 
 from kernel_optional_source import CASES, ROOT, digest, source_checks
-from verify_topology import check_cleanup, now, run
+from verify_topology import check_cleanup, check_flows, now, run
 
 BASE_STAGES = ["forwarding-off", "routed", "snat", "dnat", "mapping-removed", "direct-after-removal"]
 POLICY_STAGES = ["policy-baseline-direct", "policy-baseline-mapped", "policy-mapped-allowed",
@@ -34,6 +34,7 @@ def check_observations(data, kind, corrected, mode):
         assert lab.get("error") and lab["complete"] is False
         if mode == "cancellation":
             assert "signal" in lab["error"]
+            check_flows(data, True, policy_complete=True, interrupted=True)
             assert [r["stage"] for r in rows] == BASE_STAGES + POLICY_STAGES[:2]
             assert re.search(r"^:FORWARD DROP \[\d+:\d+\]$", lab["policyBeforeInterruption"], re.M)
         return
@@ -139,7 +140,7 @@ def observe(work, label, kind, corrected, mode, exposure, raw, proof):
     code, stdout, stderr = run(argv, proof["processes"], ready if mode == "cancellation" else None)
     (raw / (label + ".stdout")).write_text(stdout)
     (raw / (label + ".stderr")).write_text(stderr)
-    assert code == (0 if mode == "normal" else 2), (label, code, stderr)
+    assert code == (0 if mode == "normal" else 1), (label, code, stderr)
     data = json.loads(report.read_text())
     proof["runs"].append({"profile": label, "kind": kind, "corrected": corrected, "mode": mode,
                           "exitCode": code, "rawReport": str(report), "rawSHA256": digest(report), "evidence": data})

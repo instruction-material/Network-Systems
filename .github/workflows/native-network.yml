@@ -5,7 +5,7 @@ on:
     inputs:
       scope:
         type: choice
-        options: [dns-optional, ufw-optional, routing-capture-optional, full]
+        options: [dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
         default: dns-optional
         description: Native source scope
   pull_request:
@@ -223,7 +223,7 @@ jobs:
 
 
   native-routing-optional:
-    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'routing-capture-optional'
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'routing-capture-optional' || inputs.scope == 'routing-optional'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -253,7 +253,7 @@ jobs:
 
 
   native-capture-optional:
-    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'routing-capture-optional'
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'routing-capture-optional' || inputs.scope == 'capture-optional'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
