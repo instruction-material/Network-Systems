@@ -200,10 +200,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 ufw iproute2 iptables util-linux curl
+      - name: Check passive countdowns and actual address-change controls
+        run: python3 -B test/test_ufw_host_state.py
       - name: Check optional role sources and unchanged isolation apparatus
         run: python3 -B test/verify_ufw_optional.py --source-only --proof output/source/network-ufw-optional.json
       - name: Verify changed management ports, profile exposure, corrections and rollback
         run: sudo python3 -B test/verify_ufw_optional.py --proof output/native/network-ufw-optional.json
+      - name: Verify the core UFW project with the same corrected host comparison
+        run: sudo python3 -B test/verify_ufw.py --proof output/core/network-ufw-core.json
       - name: Retain original source, requests, rules and lifecycle evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

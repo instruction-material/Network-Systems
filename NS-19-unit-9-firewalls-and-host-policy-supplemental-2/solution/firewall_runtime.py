@@ -81,11 +81,31 @@ def configuration_hashes():
             "defaultUfw": hashlib.sha256(Path("/etc/default/ufw").read_bytes()).hexdigest()}
 
 
+def address_configuration(raw):
+    """Retain address properties and lifetime class, apart from passive seconds."""
+    rows = json.loads(raw)
+    for interface in rows:
+        for address in interface.get("addr_info", []):
+            for field in ("valid_life_time", "preferred_life_time"):
+                if field not in address:
+                    continue
+                seconds = address[field]
+                if seconds == 4294967295 or seconds == "forever":
+                    address[field] = "forever"
+                elif isinstance(seconds, int) and not isinstance(seconds, bool) and seconds > 0:
+                    address[field] = "finite"
+                elif type(seconds) is int and seconds == 0:
+                    address[field] = "expired"
+                else:
+                    raise ValueError("unrecognized address lifetime")
+    return json.dumps(rows, sort_keys=True, separators=(",", ":"))
+
+
 def host_state(records):
     return {"networkNamespace": os.readlink("/proc/self/ns/net"),
             "mountNamespace": os.readlink("/proc/self/ns/mnt"),
             "links": command(["ip", "-j", "link", "show"], records)["stdout"],
-            "addresses": command(["ip", "-j", "addr", "show"], records)["stdout"],
+            "addresses": address_configuration(command(["ip", "-j", "addr", "show"], records)["stdout"]),
             "routes": command(["ip", "-j", "route", "show", "table", "all"], records)["stdout"],
             "ipv6Routes": command(["ip", "-6", "-j", "route", "show", "table", "all"], records)["stdout"],
             "firewall": firewall_configuration(command(["iptables-save"], records)["stdout"]),

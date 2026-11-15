@@ -128,3 +128,7 @@ verification; the current result does not imply those extensions succeeded.
 
 - [UFW command, remote-management and application-profile manual](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html)
 - [UFW framework and configuration files](https://manpages.ubuntu.com/manpages/noble/man8/ufw-framework.8.html)
+
+## Address lifetime evidence
+
+The command records retain raw address lifetime seconds. The host configuration comparison retains every other address property and distinguishes finite, forever and expired lifetimes. Passive lease countdowns can change during a run; a changed address, prefix, interface property or lifetime class remains a configuration difference. This comparison accompanies the separate route, IPv4/IPv6 firewall, forwarding and UFW-file checks.

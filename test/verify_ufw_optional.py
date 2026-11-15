@@ -212,7 +212,7 @@ def main():
                          oneFileCorrections=2, incorrectDefaultSuccessDemonstrated=True,
                          actualOverexposureDemonstrated=True, wrongProtocolRejected=True,
                          actualPolicyRollbacks=len(proof["cases"]), hostUnchangedInAllProfiles=True,
-                         originalGuardsAndRuntimeUnchanged=True)
+                         isolationGuardsUnchanged=True, allRoleRuntimesMatchCore=True, sharedHostComparisonFix=True)
     finally:
         proof["endedAt"] = now()
         write_proof(args.proof, proof)
