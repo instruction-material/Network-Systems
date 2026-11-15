@@ -208,6 +208,10 @@ jobs:
         run: sudo python3 -B test/verify_ufw_optional.py --proof output/native/network-ufw-optional.json
       - name: Verify the core UFW project with the same corrected host comparison
         run: sudo python3 -B test/verify_ufw.py --proof output/core/network-ufw-core.json
+      - name: Make owned native evidence readable by the artifact publisher
+        if: always()
+        run: |
+          if [ -d output ]; then sudo chmod -R a+rX output; fi
       - name: Retain original source, requests, rules and lifecycle evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

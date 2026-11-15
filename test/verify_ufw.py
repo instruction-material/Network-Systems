@@ -59,9 +59,10 @@ def run(argv, records, ready=None):
     return process.returncode, stdout.decode(), stderr.decode()
 
 
-def source_checks(root):
+def source_checks(root, include_role_markers=True):
     hashes = {}
-    for relative in ["README.md"] + [role + "/" + name for role in ("starter", "solution") for name in ROLE_FILES]:
+    role_files = ROLE_FILES if include_role_markers else tuple(name for name in ROLE_FILES if name != "README.md")
+    for relative in ["README.md"] + [role + "/" + name for role in ("starter", "solution") for name in role_files]:
         path = root / PACK / relative
         raw = path.read_bytes()
         assert b"\r" not in raw, relative
@@ -161,10 +162,11 @@ def check_case(case):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-only", action="store_true")
+    parser.add_argument("--exported-source", action="store_true", help="Verify the functional site-export inventory, without redundant per-role README markers")
     parser.add_argument("--proof", type=Path, required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    proof = {"pack": PACK, "sourceHashes": source_checks(root), "nativeAccepted": False, "cases": [], "commands": [], "refusals": []}
+    proof = {"pack": PACK, "sourceHashes": source_checks(root, not args.exported_source), "nativeAccepted": False, "cases": [], "commands": [], "refusals": []}
     write_proof(args.proof, proof)
     if args.source_only:
         print(json.dumps({"sourceFiles": len(proof["sourceHashes"]), "sourceOnlyPassed": True, "nativeAccepted": False}))

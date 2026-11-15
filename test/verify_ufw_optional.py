@@ -21,13 +21,14 @@ ROLE_FILES = ["README.md", "network-notes.md", "apply_web_policy.sh",
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
-def source_checks():
+def source_checks(include_role_markers=True):
     base = ROOT / "NS3-UFW-Web-Server-Policy/solution"
     hashes = {}
     for index, pack in enumerate(PACKS):
         folder = ROOT / pack
+        role_files = ROLE_FILES if include_role_markers else [name for name in ROLE_FILES if name != "README.md"]
         for name in ["README.md"] + [role + "/" + name for role in ["starter", "solution"]
-                                      for name in ROLE_FILES]:
+                                      for name in role_files]:
             path = folder / name
             hashes[pack + "/" + name] = digest(path)
             if path.suffix == ".py":
@@ -116,12 +117,13 @@ def check_case(case):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-only", action="store_true")
+    parser.add_argument("--exported-source", action="store_true", help="Verify functional exports with their complete shared guide")
     parser.add_argument("--proof", type=Path, required=True)
     args = parser.parse_args()
     args.proof = args.proof.resolve()
     raw = args.proof.parent / "ufw-optional-raw"
     raw.mkdir(parents=True, exist_ok=False)
-    proof = {"at": now(), "nativeAccepted": False, "sourceFiles": source_checks(),
+    proof = {"at": now(), "nativeAccepted": False, "sourceFiles": source_checks(not args.exported_source),
              "cases": [], "commands": [], "refusals": []}
     write_proof(args.proof, proof)
     if args.source_only:
@@ -204,7 +206,7 @@ def main():
                 proof["refusals"].append({"name": name, "exitCode": code, "stdout": stdout, "stderr": stderr})
                 assert code != 0
             assert kept.read_text() == "Keep the earlier observation.\n"
-            assert source_checks() == proof["sourceFiles"]
+            assert source_checks(not args.exported_source) == proof["sourceFiles"]
             proof.update(nativeAccepted=True, actualProfiles=len(proof["cases"]),
                          actualObservations=sum(len(c["report"]["lab"]["observations"]) for c in proof["cases"]),
                          successfulHTTPRequests=sum(row["body"] is not None for c in proof["cases"]
