@@ -1,0 +1,176 @@
+{
+  "qualifiedBase": "538e7075ad3366d428d382851769cf5cbf8b23d9",
+  "baseCollectorPath": "NS2-Local-vs-Remote-Reachability-Diagnosis/solution/diagnose_reachability.sh",
+  "baseCollectorSHA256": "1522e2f49086e44b1398ab60ba1bf46ee5d8bc371d4849646d0fc5ebbe1d6bf6",
+  "numericCollectorOnlyDelta": "nc -vz -w 3 becomes nc -nvz -w 3",
+  "collectorSHA256": "90d23d3f3402b4092b4f29bf6c353d89258ab0d83d7c4eb21735188926a6f39f",
+  "runtimeSHA256": "7107cedc8478529ea68efb075385745d394f79a5bd3671df00a753906874f842",
+  "launcherSHA256": "072c9cd91d3765a37535f98baff6b056e6ed701c85ec78cf1dfe338439ab111c",
+  "definitions": [
+    {
+      "pack": "NS-13-unit-6-core-diagnostics-supplemental-2",
+      "kind": "protocol",
+      "title": "Diagnostic Trace Transfer Practice",
+      "field": "scheme",
+      "bad": "https",
+      "topic": "Match the application protocol to the listening service",
+      "lesson": "The supplied service speaks plain HTTP. A listening TCP socket and a successful TCP connection do not negotiate TLS. Record the selected URL scheme and compare the TCP result with both HTTP observations. Change the scheme after the evidence identifies the mismatch.",
+      "failure": "The TCP check succeeds; the HTTPS observations fail during the TLS exchange. The separate plain-HTTP control still receives the owned token. Curl commonly reports35 for this TLS failure; retain the actual diagnostic and version instead of using the number alone as the explanation.",
+      "correction": "Change only \u00a7scheme\u00a7 from \u00a7https\u00a7 to \u00a7http\u00a7. Repeat the experiment with a fresh report and show that the owned HTTP response now succeeds.",
+      "starterCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "https",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "referenceCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "diagnostics_lab.py",
+        "diagnose_reachability.sh",
+        "case.json"
+      ],
+      "taskFile": "case.json"
+    },
+    {
+      "pack": "NS-14-unit-6-core-diagnostics-supplemental-3",
+      "kind": "deadline",
+      "title": "Diagnostic Trace Extension Practice",
+      "field": "responseMode",
+      "bad": "silent",
+      "topic": "Distinguish an accepted TCP connection from an HTTP response",
+      "lesson": "The supplied service accepts connections and reads HEAD requests but deliberately withholds a response. Curl has a two-second connection deadline and a three-second total deadline; netcat checks the TCP connection only. Use the actual listener, request log and command statuses to distinguish the application wait from a missing listener.",
+      "failure": "Both HTTP observations reach their finite deadline, commonly curl28, while the TCP check succeeds. The independent one-second HTTP control also records a timeout and retains any bytes actually received. That controlled application silence does not identify a firewall or Internet path failure.",
+      "correction": "Change only \u00a7responseMode\u00a7 from \u00a7silent\u00a7 to \u00a7http\u00a7. Repeat with a fresh report and verify the same kind of owned service now sends HTTP headers.",
+      "starterCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "silent",
+        "httpStatus": 200
+      },
+      "referenceCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "diagnostics_lab.py",
+        "diagnose_reachability.sh",
+        "case.json"
+      ],
+      "taskFile": "case.json"
+    },
+    {
+      "pack": "NS-01-network-systems-lab-15",
+      "kind": "address",
+      "title": "Diagnostic Workflow Studio",
+      "field": "targetAddress",
+      "bad": "reserved",
+      "topic": "Diagnose a loopback binding mismatch through an evidence ladder",
+      "lesson": "The owned service binds127.0.0.1. The selected target begins as127.0.0.2 at the same port. Both addresses are loopback, but a listener bound to one address does not automatically listen on the other. The experiment reserves127.0.0.2 without listening there; it does not add an interface address. Compare listener binding, successful loopback HTTP and failed target HTTP/TCP before proposing a correction.",
+      "failure": "The listener and127.0.0.1 HTTP observation succeed; the selected127.0.0.2 endpoint refuses connection. Curl commonly reports7 and netcat a nonzero status for that target. This demonstrates a local address mismatch; every command still originates on the same machine.",
+      "correction": "Change only \u00a7targetAddress\u00a7 from \u00a7reserved\u00a7 to \u00a7owned\u00a7. Repeat the same evidence ladder and support the smallest correction with the recovered owned token.",
+      "starterCase": {
+        "targetAddress": "reserved",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "referenceCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "diagnostics_lab.py",
+        "diagnose_reachability.sh",
+        "case.json"
+      ],
+      "taskFile": "case.json"
+    },
+    {
+      "pack": "NS-29-applied-studio-15-network-systems-lab-15-supplemental-2",
+      "kind": "port",
+      "title": "Diagnostic Workflow Transfer Practice",
+      "field": "targetPort",
+      "bad": "reserved",
+      "topic": "Transfer a diagnosis to a changed service port",
+      "lesson": "The fixture allocates a live HTTP port and a separate socket that is bound but never listens. The starter selects the reserved port. Find the live port in the report, compare it with the selected target and inspect the listener section. A socket reservation and a listening TCP service are different states.",
+      "failure": "At the reserved port, the listener list contains no listening service and both HTTP observations and the TCP check fail. The independent control at the owned live HTTP port succeeds. A route change is unsupported by this evidence.",
+      "correction": "Change only \u00a7targetPort\u00a7 from \u00a7reserved\u00a7 to \u00a7owned\u00a7. Preserve the first report; repeat and compare the actual selected/listening ports and recovered HTTP response.",
+      "starterCase": {
+        "targetAddress": "owned",
+        "targetPort": "reserved",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "referenceCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "diagnostics_lab.py",
+        "diagnose_reachability.sh",
+        "case.json"
+      ],
+      "taskFile": "case.json"
+    },
+    {
+      "pack": "NS-30-applied-studio-15-network-systems-lab-15-supplemental-3",
+      "kind": "status",
+      "title": "Diagnostic Workflow Extension Practice",
+      "field": "httpStatus",
+      "bad": 500,
+      "topic": "Distinguish a successful exchange from a successful application response",
+      "lesson": "The owned service deliberately returns HTTP500 in the starter. The supplied curl command retains headers and does not use --fail, so a successful exchange can have curl status0 while the HTTP status is500. Compare command status, HTTP status, listener, TCP connection and owned response token before deciding the application is healthy.",
+      "failure": "Both HTTP exchanges complete and carry the owned token, and the TCP connection succeeds. Their HTTP status is500, so \u00a7complete\u00a7 remains false. The independent raw HEAD exchange also records the500 status line. Transport recovery is not the missing evidence.",
+      "correction": "Change only \u00a7httpStatus\u00a7 from500 to200 to change the owned fixture response. Repeat and verify the status line and token in both curl observations and the independent raw control.",
+      "starterCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 500
+      },
+      "referenceCase": {
+        "targetAddress": "owned",
+        "targetPort": "owned",
+        "scheme": "http",
+        "responseMode": "http",
+        "httpStatus": 200
+      },
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "diagnostics_lab.py",
+        "diagnose_reachability.sh",
+        "case.json"
+      ],
+      "taskFile": "case.json"
+    }
+  ]
+}

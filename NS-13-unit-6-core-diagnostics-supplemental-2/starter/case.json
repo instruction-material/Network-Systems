@@ -1,0 +1,7 @@
+{
+  "targetAddress": "owned",
+  "targetPort": "owned",
+  "scheme": "https",
+  "responseMode": "http",
+  "httpStatus": 200
+}

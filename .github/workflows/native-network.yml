@@ -5,7 +5,7 @@ on:
     inputs:
       scope:
         type: choice
-        options: [dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
+        options: [diagnostics-five, dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
         default: dns-optional
         description: Native source scope
   pull_request:
@@ -280,3 +280,27 @@ jobs:
           path: output/
           if-no-files-found: error
           retention-days: 14
+
+
+  native-diagnostics-five:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'diagnostics-five'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare owned ordinary-user diagnostic tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 iproute2 curl netcat-openbsd coreutils strace
+      - name: Verify actual failures, one-field corrections, changed cases and cleanup
+        run: python3 -B test/verify_diagnostics_five.py --proof output/diagnostics-five/native.json
+      - name: Retain original commands, socket syscalls, reports and process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-diagnostics-five-native
+          path: output/
+          if-no-files-found: error
+          retention-days: 30
