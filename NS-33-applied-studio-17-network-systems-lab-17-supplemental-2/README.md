@@ -73,7 +73,7 @@ address, while the latter cannot select server .2. The directly connected
 client next hop remains 198.18.31.1. Do not confuse those two router addresses.
 
 The IPv6 resolver can still return A = 198.18.32.2 and AAAA =
-2001:db8:32::2. Its IPv6 application request should return the correct owned
+2001:db8:32::2. Its IPv6 application request returns the correct owned
 body, while the IPv4 application request records status 000 and a nonzero
 command result. An IPv4 denied-control failure in this unfinished case is
 already explained by routing and does not prove that the server policy ran.
