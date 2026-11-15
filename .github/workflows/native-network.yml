@@ -5,7 +5,7 @@ on:
     inputs:
       scope:
         type: choice
-        options: [dns-optional, ufw-optional, full]
+        options: [dns-optional, ufw-optional, routing-capture-optional, full]
         default: dns-optional
         description: Native source scope
   pull_request:
@@ -217,6 +217,66 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: network-ufw-optional-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 14
+
+
+  native-routing-optional:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'routing-capture-optional'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare the owned kernel lab tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 iproute2 iptables util-linux curl
+      - name: Verify source inventory and unchanged qualified apparatus
+        run: python3 -B test/verify_routing_optional.py --source-only --proof output/source/routing-optional.json
+      - name: Verify actual task failures, corrections, observations and cleanup
+        run: sudo python3 -B test/verify_routing_optional.py --proof output/native/routing-optional.json
+      - name: Make owned evidence readable by the artifact publisher
+        if: always()
+        run: |
+          if [ -d output ]; then sudo chmod -R a+rX output; fi
+      - name: Retain original observed kernel and process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-routing-optional-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 14
+
+
+  native-capture-optional:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'routing-capture-optional'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prepare the owned kernel lab tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 iproute2 iptables util-linux tcpdump
+      - name: Verify source inventory and unchanged qualified apparatus
+        run: python3 -B test/verify_capture_optional.py --source-only --proof output/source/capture-optional.json
+      - name: Verify actual task failures, corrections, observations and cleanup
+        run: sudo python3 -B test/verify_capture_optional.py --proof output/native/capture-optional.json
+      - name: Make owned evidence readable by the artifact publisher
+        if: always()
+        run: |
+          if [ -d output ]; then sudo chmod -R a+rX output; fi
+      - name: Retain original observed kernel and process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-capture-optional-source
           path: output/
           if-no-files-found: error
           retention-days: 14

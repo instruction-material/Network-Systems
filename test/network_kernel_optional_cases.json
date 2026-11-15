@@ -1,0 +1,157 @@
+{
+  "qualifiedBaseCommit": "4880f07adac15dbbebcad6146fbeaff2f554347f",
+  "routing": [
+    {
+      "pack": "NS-15-unit-7-linux-interface-and-route-management-supplemental-2",
+      "kind": "snat-source",
+      "title": "Routing transfer: diagnose an SNAT source match",
+      "stage": "snat",
+      "before": "-s 10.10.0.0/24",
+      "after": "-s 10.99.0.0/24",
+      "exposure": false,
+      "task": "The supplied route and forwarding work, but the SNAT rule selects a different client subnet. Predict which HTTP requests still succeed and which peer address the server reports. Keep the first report, then correct only the source-prefix match in the snat case of lab-rules.sh. Explain why a successful routed request does not demonstrate that translation matched.",
+      "reference": "The actual client is 10.10.0.2/24. Matching its 10.10.0.0/24 source range makes the selected requests leave rr0 with source 10.20.0.1. The routed request before SNAT still reports 10.10.0.2. A result for this one owned client does not establish behavior for every address in the subnet.",
+      "taskFile": "lab-rules.sh",
+      "roleFiles": [
+        "create_nat_lab.sh",
+        "lab_runtime.py",
+        "lab-rules.sh",
+        "network-notes.md"
+      ],
+      "choiceHashes": {
+        "starter": "802c9d2b29d06e5bfa9d03d32cb59672b059f37c6ed35d870a53b462d2627a5b",
+        "solution": "f2872d1087b9bd3c8edad8f12a796f997ce2abf0783778ca7b06cef87fce7b80"
+      }
+    },
+    {
+      "pack": "NS-16-unit-7-linux-interface-and-route-management-supplemental-3",
+      "kind": "dnat-port",
+      "title": "Routing extension: locate a translated destination-port fault",
+      "stage": "dnat",
+      "before": "--to-destination 10.20.0.2:8080",
+      "after": "--to-destination 10.20.0.2:8081",
+      "exposure": false,
+      "task": "Direct routing and SNAT work. The public-side mapping selects a server port without the owned HTTP listener. Predict the first differing stage, retain the mapped-request failure, then correct only the destination port in the dnat case of lab-rules.sh. Reconcile the requested router endpoint with the actual server listener.",
+      "reference": "The requested router endpoint remains 10.10.0.1:18080, while the owned listener is 10.20.0.2:8080. Changing the DNAT destination port to 8080 restores the mapped request. The later mapping removal still breaks a fresh mapped request while a direct request continues to work.",
+      "taskFile": "lab-rules.sh",
+      "roleFiles": [
+        "create_nat_lab.sh",
+        "lab_runtime.py",
+        "lab-rules.sh",
+        "network-notes.md"
+      ],
+      "choiceHashes": {
+        "starter": "fdd1747778ba2e34196c45a62360a3e71795eb3b7e0ddb5d2112c4b269bfd67b",
+        "solution": "f2872d1087b9bd3c8edad8f12a796f997ce2abf0783778ca7b06cef87fce7b80"
+      }
+    },
+    {
+      "pack": "NS-25-unit-12-secure-exposure-of-services-supplemental-2",
+      "kind": "exposure-bypass",
+      "title": "Exposure transfer: close a direct-path bypass",
+      "stage": "filter",
+      "before": "--ctorigdst 10.10.0.1 --ctorigdstport 18080 -j ACCEPT",
+      "after": "-j ACCEPT",
+      "exposure": true,
+      "task": "The router already supplies working forwarding, SNAT and DNAT. Its new-connection policy matches the translated server endpoint without restricting the original published endpoint. Predict both the mapped and direct requests. Retain the direct-path exposure, then restore only the original-destination and original-port match in the filter case of lab-rules.sh.",
+      "reference": "Both routes arrive at FORWARD with translated destination 10.20.0.2:8080. Requiring the original destination 10.10.0.1 and port 18080 keeps the mapped entry usable and denies a fresh direct request. The final direct request after private-filter removal proves that the policy comparison did not depend on stopping the listener.",
+      "taskFile": "lab-rules.sh",
+      "roleFiles": [
+        "create_nat_lab.sh",
+        "lab_runtime.py",
+        "lab-rules.sh",
+        "network-notes.md"
+      ],
+      "choiceHashes": {
+        "starter": "24dd097cda4ae56e89052aa2f3195c787785fe4b3fa6305ab0d57b49f4d84225",
+        "solution": "f2872d1087b9bd3c8edad8f12a796f997ce2abf0783778ca7b06cef87fce7b80"
+      }
+    },
+    {
+      "pack": "NS-26-unit-12-secure-exposure-of-services-supplemental-3",
+      "kind": "exposure-port",
+      "title": "Exposure extension: match the destination after translation",
+      "stage": "filter",
+      "before": "--dport 8080",
+      "after": "--dport 18080",
+      "exposure": true,
+      "task": "The original published tuple is selected, but the new-connection rule compares the packet destination port with the public-side port after DNAT has already changed it. Predict why both baselines work while the legitimate published request fails under this policy. Correct only the packet destination-port match in the filter case of lab-rules.sh.",
+      "reference": "The packet reaching FORWARD uses destination port 8080. The connection's original destination-port match separately names 18080. Keeping these two observations distinct allows the published path without allowing a direct bypass. Both the pre-policy baseline and the restored direct request remain part of the explanation.",
+      "taskFile": "lab-rules.sh",
+      "roleFiles": [
+        "create_nat_lab.sh",
+        "lab_runtime.py",
+        "lab-rules.sh",
+        "network-notes.md"
+      ],
+      "choiceHashes": {
+        "starter": "d0eb6bb98e152c5816bd933ace0b7a64a7d39ddf75a4b14b7d93820e2bf8f493",
+        "solution": "f2872d1087b9bd3c8edad8f12a796f997ce2abf0783778ca7b06cef87fce7b80"
+      }
+    }
+  ],
+  "capture": [
+    {
+      "pack": "NS-21-unit-10-packet-capture-and-deep-inspection-supplemental-2",
+      "kind": "capture-bound",
+      "title": "Capture transfer: retain enough evidence for an HTTP claim",
+      "starterSettings": {
+        "packetLimit": 2,
+        "filterPort": true
+      },
+      "referenceSettings": {
+        "packetLimit": 64,
+        "filterPort": true
+      },
+      "task": "The filter already selects the owned HTTP service, but the two-packet ceiling ends capture before the HTTP exchange is retained. Predict the capture independently of the application's successful responses. Preserve the short first capture, then change only packetLimit in capture-options.sh to a positive value at most 64 that retains the complete target evidence. The reference uses 64; also compare a fresh run with 32.",
+      "reference": "A two-packet capture can stop at connection establishment even when the HTTP request later succeeds. A complete HTTP claim needs the retained request, response and run identity, not only SYN traffic. Raising the ceiling preserves the selection filter and lets the owned exchange be captured. The apparatus still owns a separate wall-clock and cleanup bound.",
+      "taskFile": "capture-options.sh",
+      "roleFiles": [
+        "capture_http.sh",
+        "capture_runtime.py",
+        "capture-options.sh",
+        "network-notes.md"
+      ],
+      "choiceHashes": {
+        "starter": "d19ffb4773122c39c350c2b6aafddc9b9cd9616aaddfc89fc10c11d2c28277a0",
+        "solution": "3d9bafb98fb9f3b3035ad3eb5c21dcd1802524b46da44f2a924046dd79971515"
+      }
+    },
+    {
+      "pack": "NS-22-unit-10-packet-capture-and-deep-inspection-supplemental-3",
+      "kind": "capture-selection",
+      "title": "Capture extension: separate the selected service from nearby traffic",
+      "starterSettings": {
+        "packetLimit": 64,
+        "filterPort": false
+      },
+      "referenceSettings": {
+        "packetLimit": 64,
+        "filterPort": true
+      },
+      "task": "The capture is bounded, but its expression includes traffic to a second owned loopback listener. Predict the target and noise conversations before reading the packets. Preserve the broad first capture, then change only filterPort in capture-options.sh. Compare default and --reverse request order with fresh reports so a successful selection cannot depend on which request happened first.",
+      "reference": "The selected service is TCP 8080; the nearby owned noise listener is TCP 8081. Enabling the destination-or-source port selection keeps the target conversation and excludes the other service in either request order. A port filter selects packets; it does not establish that the application outcome was useful or that every packet on another interface was observed.",
+      "taskFile": "capture-options.sh",
+      "roleFiles": [
+        "capture_http.sh",
+        "capture_runtime.py",
+        "capture-options.sh",
+        "network-notes.md"
+      ],
+      "choiceHashes": {
+        "starter": "af0c9958a11738ae90c11bd1e30f8749bb7e96c882a785ca014a3f9072b3ad27",
+        "solution": "3d9bafb98fb9f3b3035ad3eb5c21dcd1802524b46da44f2a924046dd79971515"
+      }
+    }
+  ],
+  "qualifiedApparatus": {
+    "routing": {
+      "create_nat_lab.sh": "ab62b86add7ce34caa4dee656ebd2e4d6307ce858512fb20f3bd1e594f1cedd7",
+      "lab_runtime.py": "fa93168f2f7f432f8b9984e04cbf8fcaba4f7c82928a1fe2f703f26a5085c55c"
+    },
+    "capture": {
+      "capture_http.sh": "5e411f6312e19b8235d637d96c0a3af7b80800e40c5cd04ada416c530b0cfca7",
+      "capture_runtime.py": "35ef828ea617696185397d9d3cf45cf6ddad4d04bf44524f0832373c302c4fb8"
+    }
+  }
+}
