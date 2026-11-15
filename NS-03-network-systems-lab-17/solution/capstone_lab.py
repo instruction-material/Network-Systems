@@ -135,9 +135,11 @@ def serve(public_port, upstream_port, token):
     require_isolation()
 
     class Application(http.server.BaseHTTPRequestHandler):
+        fixture_identity = "owned-operations-capstone"
+
         def do_GET(self):
             status = 200 if self.path == "/health" else 404
-            data = json.dumps({"fixture": "owned-operations-capstone", "token": token, "path": self.path}).encode()
+            data = json.dumps({"fixture": self.fixture_identity, "token": token, "path": self.path}).encode()
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(data)))
@@ -146,6 +148,9 @@ def serve(public_port, upstream_port, token):
 
         def log_message(self, _format, *_arguments):
             return
+
+    class DenialControl(Application):
+        fixture_identity = "owned-denial-control"
 
     class Proxy(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
@@ -171,8 +176,8 @@ def serve(public_port, upstream_port, token):
     servers = [http.server.ThreadingHTTPServer(("127.0.0.1", 9000), Application),
                http.server.ThreadingHTTPServer(("0.0.0.0", public_port), Proxy),
                IPv6Server(("::", public_port), Proxy),
-               http.server.ThreadingHTTPServer(("0.0.0.0", 8088), Application),
-               IPv6Server(("::", 8088), Application)]
+               http.server.ThreadingHTTPServer(("0.0.0.0", 8088), DenialControl),
+               IPv6Server(("::", 8088), DenialControl)]
     for server in servers:
         server.daemon_threads = True
         threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -273,6 +278,7 @@ def inside(case_file, output, alternate, hold):
         report["routes4"] = command(["ip", "-n", namespaces[0], "-4", "route", "show"])
         report["routes6"] = command(["ip", "-n", namespaces[0], "-6", "route", "show"])
         report["routeGet4"] = command(["ip", "-n", namespaces[0], "-4", "route", "get", s4], check=False)
+        report["routeGetServerRouter4"] = command(["ip", "-n", namespaces[0], "-4", "route", "get", g4], check=False)
         report["routeGet6"] = command(["ip", "-n", namespaces[0], "-6", "route", "get", s6], check=False)
         report["listeners"] = ns(namespaces[2], "ss", "-H", "-lntup")
         report["policy4"] = ns(namespaces[2], "iptables", "-S")
@@ -304,6 +310,7 @@ def inside(case_file, output, alternate, hold):
                     all(report[key]["status"] == "000" and report[key]["command"]["exitCode"] != 0 for key in ["denied4", "denied6", "directUpstream"])]
         upstream_listeners = [line.split()[4] for line in report["listeners"]["stdout"].splitlines() if len(line.split()) >= 6 and line.split()[4].endswith(":9000")]
         expected.append(upstream_listeners == ["127.0.0.1:9000"])
+        expected.append(case["proxy_upstream_port"] == 9000)
         for family in ["http4", "http6"]:
             try:
                 body = json.loads(report[family]["body"])

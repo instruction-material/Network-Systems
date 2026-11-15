@@ -37,3 +37,7 @@ a completed case. Confirm the actual worker end records, empty owned namespace
 list and unchanged calling-host configuration. No persistent host firewall,
 resolver, default route or service change is a recovery step for this fixture.
 Use a new output folder for every attempt so earlier evidence is preserved.
+
+## Verify the intended backend endpoint
+
+The owned denial-control listener on 8088 deliberately returns fixture = owned-denial-control with the same run token. The intended 127.0.0.1:9000 backend returns owned-operations-capstone. Compare case.json, service.log's proxyTarget, actual listeners and the full response body. HTTP 200, a proxy header or a token alone cannot certify the intended backend. Completion requires the configured backend 9000 and its expected application identity. Direct control access remains denied by the private server policy.

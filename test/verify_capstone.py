@@ -224,6 +224,11 @@ def cleanup_evidence(output):
 def completed_evidence(output, alternate):
     parent, lab, commands = cleanup_evidence(output)
     assert parent["exitCode"] == 0 and not parent["cancelled"] and not lab["interrupted"] and lab["completed"]
+    assert lab["case"]["proxy_upstream_port"] == 9000
+    service = [json.loads(line) for line in (output / "service.log").read_text().splitlines()
+               if line.startswith("{")]
+    assert len(service) == 1 and service[0]["proxyTarget"] == 9000
+    assert service[0]["upstream"] == "127.0.0.1:9000"
     client_net = 41 if alternate else 31
     c4, c6 = f"198.18.{client_net}.2", f"2001:db8:{client_net}::2"
     s4, s6, port = "198.18.32.2", "2001:db8:32::2", 8087 if alternate else 8080

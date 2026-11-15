@@ -1,0 +1,35 @@
+{
+  "definitions": [
+    {
+      "pack": "NS-33-applied-studio-17-network-systems-lab-17-supplemental-2",
+      "kind": "prefix",
+      "title": "Operations Capstone Transfer Practice",
+      "starterCase": {
+        "ipv4_service_route": "198.18.32.0/31",
+        "proxy_upstream_port": 9000
+      }
+    },
+    {
+      "pack": "NS-34-applied-studio-17-network-systems-lab-17-supplemental-3",
+      "kind": "identity",
+      "title": "Operations Capstone Extension Practice",
+      "starterCase": {
+        "ipv4_service_route": "198.18.32.0/30",
+        "proxy_upstream_port": 8088
+      }
+    }
+  ],
+  "correctCase": {
+    "ipv4_service_route": "198.18.32.0/30",
+    "proxy_upstream_port": 9000
+  },
+  "roleFiles": [
+    "main.py",
+    "capstone_lab.py",
+    "case.json",
+    "network-notes.md",
+    "edge-cases.md"
+  ],
+  "runtimeSHA256": "2dba156faa95810215e50c27d92f42372c9f7477d63faddf6f31106d2c0b6c9a",
+  "launcherSHA256": "b726412d8c1eb2c21828e737920cbe1fa7cd210b259742f667e543b234005210"
+}

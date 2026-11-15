@@ -82,3 +82,7 @@ For every attempt, check `allWorkersReaped`, the empty remaining namespace list,
 Complete `network-notes.md` and `edge-cases.md` with the boundary card, topology, versions, predictions, first failures, intermediate correction, final retests, policy matrix, packet interpretation and recovery. Name one remaining limitation. Independent work and a paced walkthrough use the same saved evidence. A walkthrough can pause at scope, each route, resolver transport, listener ownership, each first failure, corrected retest and final cleanup. Optional transfer/extension work follows this completed capstone and keeps its own attempt.
 
 Native namespace behavior is described in the [Linux `unshare` manual](https://man7.org/linux/man-pages/man1/unshare.1.html). Keep the fixture's actual version and recorded behavior beside that reference.
+
+## Verify the intended backend endpoint
+
+The owned denial-control listener on 8088 deliberately returns fixture = owned-denial-control with the same run token. The intended 127.0.0.1:9000 backend returns owned-operations-capstone. Compare case.json, service.log's proxyTarget, actual listeners and the full response body. HTTP 200, a proxy header or a token alone cannot certify the intended backend. Completion requires the configured backend 9000 and its expected application identity. Direct control access remains denied by the private server policy.

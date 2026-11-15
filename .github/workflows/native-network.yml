@@ -63,7 +63,7 @@ jobs:
           retention-days: 7
 
   native-capstone:
-    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'capstone-optional'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -305,10 +305,10 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-  native-proxy-identity:
-    if: github.event_name == 'workflow_dispatch' && inputs.scope == 'proxy-identity'
+  native-capstone-optional:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'capstone-optional' || inputs.scope == 'proxy-identity'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -317,13 +317,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 iproute2 iptables util-linux curl dnsutils tcpdump dnsmasq-base strace
-      - name: Reproduce historical incorrect proxy-target acceptance
-        run: sudo python3 -B test/verify_capstone_proxy_identity.py --expect-wrong-accepted --proof output/proxy-identity.json
-      - name: Retain exact source, syscall, packet and cleanup evidence
+      - name: Check optional sources and unchanged shared fixture
+        run: python3 -B test/verify_capstone_optional.py --source-only --proof output/source/capstone-optional.json
+      - name: Reject the actual wrong upstream despite HTTP 200 and the owned token
+        run: sudo python3 -B test/verify_capstone_proxy_identity.py --proof output/identity/proxy-identity.json
+      - name: Verify prefix coverage, response identity, independent correction and live cleanup
+        if: inputs.scope != 'proxy-identity'
+        run: sudo python3 -B test/verify_capstone_optional.py --proof output/optional/capstone-optional.json
+      - name: Make native evidence readable
+        if: always()
+        run: |
+          if [ -d output ]; then sudo chmod -R a+rX output; fi
+      - name: Retain source, actual syscall/packet and cleanup evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: network-proxy-identity
+          name: network-capstone-optional-source
           path: output/
           if-no-files-found: error
           retention-days: 7
