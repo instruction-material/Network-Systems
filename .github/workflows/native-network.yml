@@ -5,7 +5,7 @@ on:
     inputs:
       scope:
         type: choice
-        options: [proxy-identity, capstone-optional, diagnostics-five, dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
+        options: [archive-six, proxy-identity, capstone-optional, diagnostics-five, dns-optional, ufw-optional, routing-capture-optional, routing-optional, capture-optional, full]
         default: dns-optional
         description: Native source scope
   pull_request:
@@ -336,3 +336,27 @@ jobs:
           path: output/
           if-no-files-found: error
           retention-days: 7
+
+  native-archive-six:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full' || inputs.scope == 'archive-six'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      CLASSES_FAMILY_TASK_ID: network-archive-six-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify inventory and execute all six recorded-evidence assessment pairs
+        run: |
+          bash verify-course-source.sh
+          python3 -B test/verify_archive_six.py --proof output/network-archive-six.json
+          git diff --exit-code
+      - name: Retain source, recorded provenance, actual CLI and inference controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: network-archive-six-source
+          path: output/
+          if-no-files-found: error
+          retention-days: 30

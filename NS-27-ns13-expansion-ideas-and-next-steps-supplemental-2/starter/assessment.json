@@ -1,0 +1,14 @@
+{
+  "task": "expansion-transfer",
+  "answers": {
+    "baseline.firstBoundary": null,
+    "route-gap.dns4": null,
+    "route-gap.route4": null,
+    "route-gap.application6": null,
+    "route-gap.firstBoundary": null,
+    "wrong-upstream.route4": null,
+    "wrong-upstream.application4": null,
+    "wrong-upstream.firstBoundary": null
+  },
+  "notesFile": "network-notes.md"
+}

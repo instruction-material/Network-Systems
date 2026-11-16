@@ -1,0 +1,166 @@
+{
+  "definitions": [
+    {
+      "pack": "NS-10-ns13-expansion-ideas-and-next-steps",
+      "task": "expansion-plan",
+      "title": "Expansion Ideas and Next Steps",
+      "goal": "Choose a next networking specialization from a measured baseline.",
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "archive_lab.py",
+        "observations.json",
+        "assessment.json",
+        "edge-cases.md",
+        "SOURCES.md"
+      ],
+      "objectiveAnswers": {
+        "baseline.readiness": "ready_for_conceptual_extension",
+        "baseline.vpnTunnel": "not_established",
+        "baseline.bgpPolicy": "not_established",
+        "route-gap.readiness": "repair_baseline_first",
+        "route-gap.firstBoundary": "ipv4_route",
+        "wrong-upstream.readiness": "repair_baseline_first",
+        "wrong-upstream.firstBoundary": "application_identity"
+      }
+    },
+    {
+      "pack": "NS-27-ns13-expansion-ideas-and-next-steps-supplemental-2",
+      "task": "expansion-transfer",
+      "title": "Next Steps Transfer Practice",
+      "goal": "Transfer the evidence ladder to a route gap and a wrong responding application.",
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "archive_lab.py",
+        "observations.json",
+        "assessment.json",
+        "edge-cases.md",
+        "SOURCES.md"
+      ],
+      "objectiveAnswers": {
+        "baseline.firstBoundary": "none",
+        "route-gap.dns4": "matching_answer",
+        "route-gap.route4": "failed",
+        "route-gap.application6": "intended_application",
+        "route-gap.firstBoundary": "ipv4_route",
+        "wrong-upstream.route4": "selected",
+        "wrong-upstream.application4": "wrong_application",
+        "wrong-upstream.firstBoundary": "application_identity"
+      }
+    },
+    {
+      "pack": "NS-28-ns13-expansion-ideas-and-next-steps-supplemental-3",
+      "task": "expansion-claims",
+      "title": "Next Steps Extension Practice",
+      "goal": "Separate supported local observations from advanced VPN, BGP, wireless and cloud claims.",
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "archive_lab.py",
+        "observations.json",
+        "assessment.json",
+        "edge-cases.md",
+        "SOURCES.md"
+      ],
+      "objectiveAnswers": {
+        "baseline.application4": "intended_application",
+        "baseline.application6": "intended_application",
+        "baseline.vpnTunnel": "not_established",
+        "baseline.bgpPolicy": "not_established",
+        "baseline.wirelessSecurity": "not_established",
+        "baseline.cloudSecurityGroup": "not_established",
+        "open-control.control4": "control_response",
+        "open-control.control6": "control_response",
+        "open-control.otherClients": "not_established",
+        "open-control.internetExposure": "not_established"
+      }
+    },
+    {
+      "pack": "NS-02-network-systems-lab-16",
+      "task": "exposure-core",
+      "title": "Service Exposure Studio",
+      "goal": "Explain the complete path from client through proxy to the intended loopback application.",
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "archive_lab.py",
+        "observations.json",
+        "assessment.json",
+        "edge-cases.md",
+        "SOURCES.md"
+      ],
+      "objectiveAnswers": {
+        "baseline.application4": "intended_application",
+        "baseline.application6": "intended_application",
+        "baseline.backendBind4": "loopback",
+        "baseline.internetExposure": "not_established",
+        "wrong-upstream.application4": "wrong_application",
+        "wrong-upstream.application6": "wrong_application",
+        "wrong-upstream.firstBoundary": "application_identity"
+      }
+    },
+    {
+      "pack": "NS-31-applied-studio-16-network-systems-lab-16-supplemental-2",
+      "task": "exposure-families",
+      "title": "Service Exposure Transfer Practice",
+      "goal": "Distinguish address-family evidence, binding snapshots and actual peer requests.",
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "archive_lab.py",
+        "observations.json",
+        "assessment.json",
+        "edge-cases.md",
+        "SOURCES.md"
+      ],
+      "objectiveAnswers": {
+        "baseline.backendBind4": "loopback",
+        "baseline.backendBind6": "not_listed",
+        "baseline.directBackend.family": 6,
+        "baseline.directBackend.result": "request_failed",
+        "alternate.application4": "intended_application",
+        "alternate.application6": "intended_application",
+        "alternate.backendBind4": "loopback",
+        "alternate.directBackend.family": 6,
+        "route-gap.application4": "request_failed",
+        "route-gap.application6": "intended_application",
+        "route-gap.firstBoundary": "ipv4_route"
+      }
+    },
+    {
+      "pack": "NS-32-applied-studio-16-network-systems-lab-16-supplemental-3",
+      "task": "exposure-policy",
+      "title": "Service Exposure Extension Practice",
+      "goal": "Compare a protected control with the same control after a narrow policy change.",
+      "roleFiles": [
+        "network-notes.md",
+        "main.py",
+        "archive_lab.py",
+        "observations.json",
+        "assessment.json",
+        "edge-cases.md",
+        "SOURCES.md"
+      ],
+      "objectiveAnswers": {
+        "baseline.control4": "request_failed",
+        "baseline.control6": "request_failed",
+        "baseline.application4": "intended_application",
+        "open-control.control4": "control_response",
+        "open-control.control6": "control_response",
+        "open-control.application4": "intended_application",
+        "open-control.otherClients": "not_established",
+        "open-control.internetExposure": "not_established"
+      }
+    }
+  ],
+  "recordIDs": [
+    "baseline",
+    "alternate",
+    "route-gap",
+    "wrong-upstream",
+    "open-control"
+  ],
+  "sourceKind": "recorded-isolated-linux-lab",
+  "fullCourseSignoff": false
+}

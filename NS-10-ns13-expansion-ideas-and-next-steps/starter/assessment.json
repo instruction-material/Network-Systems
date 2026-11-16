@@ -1,0 +1,13 @@
+{
+  "task": "expansion-plan",
+  "answers": {
+    "baseline.readiness": null,
+    "baseline.vpnTunnel": null,
+    "baseline.bgpPolicy": null,
+    "route-gap.readiness": null,
+    "route-gap.firstBoundary": null,
+    "wrong-upstream.readiness": null,
+    "wrong-upstream.firstBoundary": null
+  },
+  "notesFile": "network-notes.md"
+}

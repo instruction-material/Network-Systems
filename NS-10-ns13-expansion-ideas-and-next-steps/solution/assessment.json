@@ -1,0 +1,13 @@
+{
+  "task": "expansion-plan",
+  "answers": {
+    "baseline.readiness": "ready_for_conceptual_extension",
+    "baseline.vpnTunnel": "not_established",
+    "baseline.bgpPolicy": "not_established",
+    "route-gap.readiness": "repair_baseline_first",
+    "route-gap.firstBoundary": "ipv4_route",
+    "wrong-upstream.readiness": "repair_baseline_first",
+    "wrong-upstream.firstBoundary": "application_identity"
+  },
+  "notesFile": "network-notes.md"
+}

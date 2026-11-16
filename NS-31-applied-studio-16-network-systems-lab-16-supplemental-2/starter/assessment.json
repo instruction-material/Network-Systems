@@ -1,0 +1,17 @@
+{
+  "task": "exposure-families",
+  "answers": {
+    "baseline.backendBind4": null,
+    "baseline.backendBind6": null,
+    "baseline.directBackend.family": null,
+    "baseline.directBackend.result": null,
+    "alternate.application4": null,
+    "alternate.application6": null,
+    "alternate.backendBind4": null,
+    "alternate.directBackend.family": null,
+    "route-gap.application4": null,
+    "route-gap.application6": null,
+    "route-gap.firstBoundary": null
+  },
+  "notesFile": "network-notes.md"
+}

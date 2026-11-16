@@ -1,0 +1,17 @@
+{
+  "task": "exposure-families",
+  "answers": {
+    "baseline.backendBind4": "loopback",
+    "baseline.backendBind6": "not_listed",
+    "baseline.directBackend.family": 6,
+    "baseline.directBackend.result": "request_failed",
+    "alternate.application4": "intended_application",
+    "alternate.application6": "intended_application",
+    "alternate.backendBind4": "loopback",
+    "alternate.directBackend.family": 6,
+    "route-gap.application4": "request_failed",
+    "route-gap.application6": "intended_application",
+    "route-gap.firstBoundary": "ipv4_route"
+  },
+  "notesFile": "network-notes.md"
+}

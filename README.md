@@ -34,8 +34,9 @@ starter, completed starter and reference roles. Its 48 cases include 33 real own
 network experiments and fifteen invalid-input refusals. A passing presence check is
 not a substitute for those native observations.
 
-The remaining 23 generic optional starter/reference pairs remain under content
-audit. Acceptance of the replaced packs does not certify those other contexts. The six earlier shell projects below are
+The six remaining archived source pairs now contain distinct recorded-evidence
+assessments and worked guides. Their current Linux CLI and site workflow gates
+are in progress; the already qualified live-lab families retain separate scope. The six earlier shell projects below are
 preserved and have separate goals and tooling requirements:
 
 1. NS1-Listening-Services-Map

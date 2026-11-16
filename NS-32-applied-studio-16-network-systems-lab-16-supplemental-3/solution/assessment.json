@@ -1,0 +1,14 @@
+{
+  "task": "exposure-policy",
+  "answers": {
+    "baseline.control4": "request_failed",
+    "baseline.control6": "request_failed",
+    "baseline.application4": "intended_application",
+    "open-control.control4": "control_response",
+    "open-control.control6": "control_response",
+    "open-control.application4": "intended_application",
+    "open-control.otherClients": "not_established",
+    "open-control.internetExposure": "not_established"
+  },
+  "notesFile": "network-notes.md"
+}

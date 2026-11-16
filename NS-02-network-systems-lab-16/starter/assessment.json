@@ -1,0 +1,13 @@
+{
+  "task": "exposure-core",
+  "answers": {
+    "baseline.application4": null,
+    "baseline.application6": null,
+    "baseline.backendBind4": null,
+    "baseline.internetExposure": null,
+    "wrong-upstream.application4": null,
+    "wrong-upstream.application6": null,
+    "wrong-upstream.firstBoundary": null
+  },
+  "notesFile": "network-notes.md"
+}

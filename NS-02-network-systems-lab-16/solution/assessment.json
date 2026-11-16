@@ -1,0 +1,13 @@
+{
+  "task": "exposure-core",
+  "answers": {
+    "baseline.application4": "intended_application",
+    "baseline.application6": "intended_application",
+    "baseline.backendBind4": "loopback",
+    "baseline.internetExposure": "not_established",
+    "wrong-upstream.application4": "wrong_application",
+    "wrong-upstream.application6": "wrong_application",
+    "wrong-upstream.firstBoundary": "application_identity"
+  },
+  "notesFile": "network-notes.md"
+}

@@ -1,0 +1,14 @@
+{
+  "task": "exposure-policy",
+  "answers": {
+    "baseline.control4": null,
+    "baseline.control6": null,
+    "baseline.application4": null,
+    "open-control.control4": null,
+    "open-control.control6": null,
+    "open-control.application4": null,
+    "open-control.otherClients": null,
+    "open-control.internetExposure": null
+  },
+  "notesFile": "network-notes.md"
+}

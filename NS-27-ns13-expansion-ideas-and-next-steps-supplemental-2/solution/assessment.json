@@ -1,0 +1,14 @@
+{
+  "task": "expansion-transfer",
+  "answers": {
+    "baseline.firstBoundary": "none",
+    "route-gap.dns4": "matching_answer",
+    "route-gap.route4": "failed",
+    "route-gap.application6": "intended_application",
+    "route-gap.firstBoundary": "ipv4_route",
+    "wrong-upstream.route4": "selected",
+    "wrong-upstream.application4": "wrong_application",
+    "wrong-upstream.firstBoundary": "application_identity"
+  },
+  "notesFile": "network-notes.md"
+}

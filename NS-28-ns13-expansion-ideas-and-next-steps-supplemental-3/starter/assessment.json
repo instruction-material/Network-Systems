@@ -1,0 +1,16 @@
+{
+  "task": "expansion-claims",
+  "answers": {
+    "baseline.application4": null,
+    "baseline.application6": null,
+    "baseline.vpnTunnel": null,
+    "baseline.bgpPolicy": null,
+    "baseline.wirelessSecurity": null,
+    "baseline.cloudSecurityGroup": null,
+    "open-control.control4": null,
+    "open-control.control6": null,
+    "open-control.otherClients": null,
+    "open-control.internetExposure": null
+  },
+  "notesFile": "network-notes.md"
+}
